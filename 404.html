@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, follow">
+<title>404 — Not Found · BULWARK</title>
+<meta name="description" content="The page you requested doesn't exist or has moved.">
+<meta name="theme-color" content="#0A0A0A">
+<link rel="canonical" href="https://bulwark-sec.github.io/landing-preview/">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{background:#0A0A0A;color:#FAFAFA;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.55;letter-spacing:-.01em;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px;overflow:hidden;position:relative}
+body::before{content:"";position:absolute;inset:0;background-image:linear-gradient(to right,rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.03) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(ellipse 800px 500px at 50% 50%,#000 0%,transparent 80%);-webkit-mask-image:radial-gradient(ellipse 800px 500px at 50% 50%,#000 0%,transparent 80%);pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:560px;width:100%}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:rgba(250,250,250,.4);letter-spacing:.08em;text-transform:uppercase;margin-bottom:24px}
+h1{font-size:clamp(96px,18vw,200px);font-weight:900;letter-spacing:-.05em;line-height:.95;background:linear-gradient(180deg,#FAFAFA 0%,rgba(250,250,250,.4) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
+h2{font-size:22px;font-weight:600;letter-spacing:-.02em;margin-bottom:12px}
+p{color:rgba(250,250,250,.6);margin-bottom:32px;font-size:15px;line-height:1.55;max-width:48ch}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:48px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:8px;font-size:13.5px;font-weight:500;text-decoration:none;transition:all 200ms cubic-bezier(.34,1.56,.64,1)}
+.btn-primary{background:#FAFAFA;color:#0A0A0A}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(250,250,250,.18)}
+.btn-ghost{border:1px solid rgba(255,255,255,.16);color:#FAFAFA}
+.btn-ghost:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.32)}
+.suggestions{border-top:1px solid rgba(255,255,255,.08);padding-top:24px}
+.suggestions-h{font-family:ui-monospace,monospace;font-size:10px;color:rgba(250,250,250,.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px}
+.suggestions ul{list-style:none;display:grid;gap:8px}
+.suggestions a{color:#FAFAFA;text-decoration:none;font-size:14px;padding:8px 0;display:flex;justify-content:space-between;align-items:center;transition:padding-left 200ms cubic-bezier(.34,1.56,.64,1)}
+.suggestions a:hover{padding-left:8px}
+.suggestions .arrow{font-family:ui-monospace,monospace;font-size:11px;color:rgba(250,250,250,.4)}
+.search{margin-bottom:24px;display:flex;gap:8px}
+.search input{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 14px;color:#FAFAFA;font-size:14px;font-family:inherit;outline:none;transition:border-color 150ms ease}
+.search input:focus{border-color:rgba(10,132,255,.6)}
+.search input::placeholder{color:rgba(250,250,250,.35)}
+.search button{background:#FAFAFA;color:#0A0A0A;border:none;border-radius:8px;padding:10px 14px;font-size:13.5px;font-weight:500;cursor:pointer;font-family:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="mono">404 · page not found</div>
+  <h1>404</h1>
+  <h2>This page is out of scope.</h2>
+  <p>
+    The URL you tried doesn't exist on the BULWARK site, or it has moved.
+    Like an out-of-scope host, it's been logged and skipped — not exploited.
+  </p>
+
+  <form class="search" onsubmit="event.preventDefault(); var q=this.q.value.trim(); if(q) location.href='/landing-preview/?q='+encodeURIComponent(q);">
+    <input type="search" name="q" placeholder="Search BULWARK docs…" aria-label="Search">
+    <button type="submit">Search</button>
+  </form>
+
+  <div class="actions">
+    <a href="/landing-preview/" class="btn btn-primary">← Back to home</a>
+    <a href="/landing-preview/#pricing" class="btn btn-ghost">View pricing</a>
+    <a href="mailto:hello@getwark.com" class="btn btn-ghost">Email us</a>
+  </div>
+
+  <div class="suggestions">
+    <div class="suggestions-h">// Maybe you were looking for</div>
+    <ul>
+      <li><a href="/landing-preview/#capabilities">Capabilities<span class="arrow">→</span></a></li>
+      <li><a href="/landing-preview/#methodology">Methodology<span class="arrow">→</span></a></li>
+      <li><a href="/landing-preview/#sample-report">Sample report<span class="arrow">→</span></a></li>
+      <li><a href="/landing-preview/#pricing">Pricing<span class="arrow">→</span></a></li>
+      <li><a href="/landing-preview/#faq">FAQ<span class="arrow">→</span></a></li>
+      <li><a href="/landing-preview/disclosure/">Vulnerability disclosure<span class="arrow">→</span></a></li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
