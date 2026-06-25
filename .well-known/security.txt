@@ -1,0 +1,15 @@
+Contact: https://disclosure.getwark.com
+Contact: mailto:security@getwark.com
+Expires: 2027-12-31T23:59:59z
+Preferred-Languages: en, fr
+Canonical: https://disclosure.getwark.com/.well-known/security.txt
+
+# Scope
+# In scope: *.getwark.com, *.bulwark-sec.github.io, the BULWARK webapp, the BULWARK CLI
+# Out of scope: third-party integrations, social engineering, physical, DDoS
+
+# Acknowledgments
+Acknowledgments: https://disclosure.getwark.com/acknowledgments
+
+# Policy
+Policy: https://disclosure.getwark.com/policy
