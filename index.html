@@ -3698,6 +3698,8 @@ Run 'bulwark &lt;command&gt; --help' for details.</pre>
 
   // === V9 — Cursor follower (simplified, no trail, hardware-accelerated) ===
   // Toggle visibility class on movement, only on desktop with hover-capable input
+  const follower = document.getElementById('cursor-follower');
+  const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   if (supportsHover) {
     let mouseX = 0, mouseY = 0;
     let followerX = 0, followerY = 0;
