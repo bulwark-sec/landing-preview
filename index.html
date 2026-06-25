@@ -1397,7 +1397,25 @@
     letter-spacing: 0.02em;
   }
 
-  /* === Responsive === */
+  /* === Responsive — V9 tuned breakpoints === */
+  /* Tablet portrait (iPad 768-960px): fix methodology tabs and hero split */
+  @media (max-width: 1024px) and (min-width: 768px) {
+    .hero-split { grid-template-columns: 1fr; gap: 48px; }
+    .hero-shot-wrap { display: flex; flex-direction: column-reverse; max-width: 600px; margin: 0 auto; }
+    .methodology-tabs { grid-template-columns: 1fr; gap: 24px; }
+    .tab-list { display: flex; gap: 0; border-top: none; border-bottom: 1px solid var(--color-border); overflow-x: auto; }
+    .tab-item { flex-shrink: 0; padding: 16px 20px; border-bottom: none; border-right: 1px solid var(--color-border); }
+    .tab-item.active::before { display: none; }
+    .tab-item.active { padding-left: 20px; border-bottom: 2px solid var(--color-fg); }
+    .section-head { grid-template-columns: 1fr; gap: 24px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+    .compliance-grid { grid-template-columns: 1fr; gap: 32px; }
+    .compliance-list { grid-template-columns: 1fr 1fr; }
+    .arch-schema { padding: 20px; }
+    .arch-schema svg { max-height: 320px; }
+    .cta-banner .wrap { grid-template-columns: 1fr; gap: 32px; }
+    .cta-banner .cta-actions { align-items: flex-start; }
+  }
   @media (max-width: 960px) {
     .hero-split, .section-head, .cta-banner .wrap, .report-grid, .methodology-tabs, .compliance-grid { grid-template-columns: 1fr; gap: 40px; }
     .hero h1 { font-size: 56px; }
@@ -1448,36 +1466,31 @@
   /* === Cursor follower (desktop only) === */
   .cursor-follower {
     position: fixed;
-    width: 32px; height: 32px;
-    border: 1px solid var(--color-fg);
+    width: 20px; height: 20px;
+    border: 1.5px solid var(--color-fg);
     border-radius: 50%;
     pointer-events: none;
     z-index: 150;
     transform: translate(-50%, -50%);
-    transition: width 250ms var(--ease-spring), height 250ms var(--ease-spring),
-                border-color 200ms var(--ease-smooth), background 200ms var(--ease-smooth);
+    transition: width 200ms var(--ease-spring), height 200ms var(--ease-spring),
+                opacity 150ms var(--ease-smooth), background 150ms var(--ease-smooth);
+    opacity: 0;
     mix-blend-mode: difference;
     display: none;
   }
-  .cursor-follower.hover { width: 56px; height: 56px; }
+  .cursor-follower.visible { opacity: 0.7; }
+  .cursor-follower.hover {
+    width: 36px; height: 36px;
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.12);
+  }
   @media (hover: hover) and (pointer: fine) {
     .cursor-follower { display: block; }
-    * { cursor: none; }
-    a, button, input, select, textarea, [role="button"] { cursor: none; }
+    /* Only hide default cursor on a/button, NOT globally — keep system cursor as fallback */
+    a, button, [role="button"], label, summary, .tab-item, .faq-item { cursor: pointer; }
   }
 
-  /* === V6 — Cursor trail === */
-  .cursor-trail {
-    position: fixed;
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--color-fg);
-    pointer-events: none;
-    z-index: 149;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-  }
-  .cursor-trail.active { opacity: 0.4; }
+  /* === V6 — Cursor trail REMOVED in V9 (was too noisy) === */
 
   /* === V6 — Magnetic CTA (refined) === */
   .magnetic { transition: transform 200ms var(--ease-smooth); }
@@ -1630,33 +1643,44 @@
   }
   .section-divider.in-view::before { transform: translate(-50%, -50%) scale(1); }
 
-  /* === V6 — Hover image reveal on cap-row === */
+  /* === V9 — Hover preview on cap-row (fixed: no more overlap with neighbors) === */
   .cap-row {
     position: relative;
+    z-index: 1;
   }
+  .cap-row:hover { z-index: 10; }
   .cap-row .cap-preview {
     position: absolute;
-    right: 24px; top: 50%;
-    transform: translateY(-50%) scale(0.95);
-    width: 220px; height: 130px;
-    background: var(--color-panel);
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
+    right: 0; top: 50%;
+    transform: translate(8px, -50%) scale(0.95);
+    transform-origin: right center;
+    width: 240px;
+    background: var(--color-fg);
+    color: var(--color-on-accent);
+    border: 1px solid var(--color-fg);
+    border-radius: 10px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 250ms var(--ease-smooth), transform 350ms var(--ease-spring);
-    padding: 12px;
+    padding: 14px 16px;
     font-family: 'Geist Mono', monospace;
     font-size: 11px;
-    color: var(--color-muted);
-    line-height: 1.5;
+    line-height: 1.6;
     overflow: hidden;
-    z-index: 5;
+    z-index: 20;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.18);
   }
+  .cap-row .cap-preview > div { color: rgba(255,255,255,0.65); }
+  .cap-row .cap-preview > div[style*="sev-low"] { color: #6FE89A !important; }
+  .cap-row .cap-preview > div[style*="sev-high"] { color: #FFB05A !important; }
+  .cap-row .cap-preview > div[style*="sev-info"] { color: #6FC3FF !important; }
+  .cap-row .cap-preview > div[style*="sev-critical"] { color: #FF6B6B !important; }
+  .cap-row .cap-preview > div[style*="color:var(--color-muted-2)"] { color: rgba(255,255,255,0.4) !important; }
   .cap-row:hover .cap-preview {
     opacity: 1;
-    transform: translateY(-50%) scale(1);
+    transform: translate(0, -50%) scale(1);
   }
+  @media (max-width: 1100px) { .cap-row .cap-preview { display: none; } }
   @media (max-width: 960px) { .cap-row .cap-preview { display: none; } }
 
   /* === Theme toggle === */
@@ -3672,27 +3696,44 @@ Run 'bulwark &lt;command&gt; --help' for details.</pre>
     }
   });
 
-  // === Cursor follower (desktop only via media query) ===
-  const follower = document.getElementById('cursor-follower');
-  const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  // === V9 — Cursor follower (simplified, no trail, hardware-accelerated) ===
+  // Toggle visibility class on movement, only on desktop with hover-capable input
   if (supportsHover) {
     let mouseX = 0, mouseY = 0;
     let followerX = 0, followerY = 0;
+    let followerVisible = false;
     let followerTicking = false;
+    let lastMoveTime = 0;
+
     document.addEventListener('mousemove', (e) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
+      const now = performance.now();
+      lastMoveTime = now;
+      if (!followerVisible) {
+        followerVisible = true;
+        follower.classList.add('visible');
+      }
       if (!followerTicking) {
         requestAnimationFrame(() => {
-          followerX += (mouseX - followerX) * 0.18;
-          followerY += (mouseY - followerY) * 0.18;
-          follower.style.left = followerX + 'px';
-          follower.style.top = followerY + 'px';
+          // Higher lag = smoother but more delayed; 0.22 = sweet spot
+          followerX += (mouseX - followerX) * 0.22;
+          followerY += (mouseY - followerY) * 0.22;
+          // translate3d forces GPU compositing, avoids layout thrash
+          follower.style.transform = `translate3d(${followerX - 10}px, ${followerY - 10}px, 0)`;
           followerTicking = false;
         });
         followerTicking = true;
       }
+      // Hide follower after 2s of no movement (reduces visual noise)
+      setTimeout(() => {
+        if (performance.now() - lastMoveTime > 2000) {
+          followerVisible = false;
+          follower.classList.remove('visible');
+        }
+      }, 2200);
     }, { passive: true });
+
     // Hover state on interactive elements
     document.querySelectorAll('a, button, .cap-row, .not-do-item, .tier, .compliance-item, .how-step, .changelog-row, .faq-item').forEach(el => {
       el.addEventListener('mouseenter', () => follower.classList.add('hover'));
@@ -3907,52 +3948,34 @@ Run 'bulwark &lt;command&gt; --help' for details.</pre>
     });
   });
 
-  // === V6 — Cursor trail (3 dots following with lag) ===
-  if (supportsHover) {
-    const trailCount = 3;
-    const trails = [];
-    for (let i = 0; i < trailCount; i++) {
-      const dot = document.createElement('div');
-      dot.className = 'cursor-trail';
-      dot.style.opacity = '0';
-      document.body.appendChild(dot);
-      trails.push({ el: dot, x: 0, y: 0, target: 0 });
-    }
-    let trailLast = 0;
-    document.addEventListener('mousemove', (e) => {
-      trails.forEach(t => { t.target = (t.target + 1) % trails.length; });
-      // Each trail catches up with a different lag factor
-      const lags = [0.08, 0.06, 0.04];
-      trails.forEach((t, i) => {
-        if (i === 0) { t.x = e.clientX; t.y = e.clientY; }
-        else {
-          t.x += (trails[i-1].x - t.x) * lags[i];
-          t.y += (trails[i-1].y - t.y) * lags[i];
-        }
-        t.el.style.left = t.x + 'px';
-        t.el.style.top = t.y + 'px';
-        t.el.style.opacity = (0.3 - i * 0.08) + '';
-      });
-    });
-    document.addEventListener('mouseleave', () => {
-      trails.forEach(t => t.el.style.opacity = '0');
-    });
-  }
+  // === V6 — Cursor trail REMOVED in V9 (was too noisy) ===
 
-  // === V6 — Scroll-driven parallax (subtle, hero + stats chart) ===
+  // === V9 — Scroll-driven parallax (GPU-accelerated, throttled, only hero) ===
+  // REMOVED in V9: parallax on multiple elements caused jank. Now only the
+  // hero shot gets a subtle parallax, throttled to rAF, with will-change hint.
   const parallaxEls = document.querySelectorAll('[data-parallax]');
   if (parallaxEls.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     let parallaxScrollY = 0;
     let parallaxTicking = false;
+    let lastUpdate = 0;
+    const PARALLAX_THROTTLE = 16; // ~60fps max
+
     window.addEventListener('scroll', () => {
       parallaxScrollY = window.scrollY;
       if (!parallaxTicking) {
         requestAnimationFrame(() => {
+          const now = performance.now();
+          if (now - lastUpdate < PARALLAX_THROTTLE) {
+            parallaxTicking = false;
+            return;
+          }
+          lastUpdate = now;
           parallaxEls.forEach(el => {
             const speed = parseFloat(el.dataset.parallax) || 0;
             const rect = el.getBoundingClientRect();
             const offset = (window.innerHeight - rect.top) * speed;
-            el.style.transform = `translateY(${offset}px)`;
+            // translate3d forces GPU layer; will-change already in CSS
+            el.style.transform = `translate3d(0, ${offset}px, 0)`;
           });
           parallaxTicking = false;
         });
