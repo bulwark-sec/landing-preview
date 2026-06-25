@@ -3702,7 +3702,7 @@ Run 'bulwark &lt;command&gt; --help' for details.</pre>
 
   // === Tagline rotative ===
   const taglineWords = document.querySelectorAll('.tagline-word');
-  const taglineRotations = ['autopilot.', 'without staffing.', 'continuously.'];
+  let taglineRotations = ['autopilot.', 'without staffing.', 'continuously.'];
   let taglineIdx = 0;
   // Set actual content
   taglineWords.forEach((el, i) => {
