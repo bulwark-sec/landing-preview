@@ -1676,6 +1676,69 @@
   .theme-toggle svg { transition: transform 400ms var(--ease-spring); }
   .theme-toggle:hover svg { transform: rotate(20deg); }
 
+  /* === V7 — Lang toggle (EN / FR) === */
+  .lang-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 32px; padding: 0 12px;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    color: var(--color-fg);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    transition: all 200ms var(--ease-smooth);
+  }
+  .lang-toggle:hover {
+    background: var(--color-panel-2);
+    border-color: var(--color-border-strong);
+  }
+  .lang-toggle .lang-current { color: var(--color-fg); font-weight: 600; }
+  .lang-toggle .lang-sep { color: var(--color-muted-2); }
+  .lang-toggle .lang-alt { color: var(--color-muted-2); }
+  .lang-toggle:hover .lang-alt { color: var(--color-fg); }
+
+  /* === V7 — A11y live region (visually hidden but announced) === */
+  .sr-only {
+    position: absolute !important;
+    width: 1px !important; height: 1px !important;
+    padding: 0 !important; margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  /* === V7 — Skip link (refined) === */
+  .skip-link {
+    position: fixed; top: -100px; left: 16px;
+    background: var(--color-fg);
+    color: var(--color-on-accent);
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px; font-weight: 500;
+    z-index: 9999;
+    transition: top 200ms var(--ease-smooth);
+    text-decoration: none;
+  }
+  .skip-link:focus { top: 16px; outline: 2px solid var(--accent-blue); outline-offset: 2px; }
+
+  /* === V7 — Focus visible (a11y, more prominent) === */
+  *:focus { outline: none; }
+  *:focus-visible {
+    outline: 2px solid var(--accent-blue);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  a:focus-visible, button:focus-visible, .faq-item:focus-visible { outline-offset: 4px; }
+
+  /* === V7 — High contrast (forced-colors) === */
+  @media (forced-colors: active) {
+    .theme-toggle, .lang-toggle, .skip-link, .tier-cta, .btn {
+      border: 1px solid CanvasText;
+    }
+    .audit-strip { border: 1px solid CanvasText; }
+  }
+
   /* === Tagline rotative === */
   .tagline-rotate {
     position: relative;
@@ -2036,14 +2099,19 @@
       <a href="#changelog">Changelog</a>
     </nav>
     <div class="nav-right">
-      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" data-i18n-aria="toggle_dark">
         <span class="theme-toggle-icon" data-mode="light">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
         </span>
       </button>
-      <span class="live"><span class="dot"></span> v5.32 · 47 active engagements</span>
-      <a href="#" class="btn btn-ghost">Sign in</a>
-      <a href="#" class="btn btn-primary">Request access →</a>
+      <button class="lang-toggle mono" id="lang-toggle" aria-label="Switch to French" data-i18n-aria="toggle_lang">
+        <span id="lang-current">EN</span>
+        <span class="lang-sep">/</span>
+        <span class="lang-alt">FR</span>
+      </button>
+      <span class="live"><span class="dot"></span> <span data-i18n="nav_status">v5.32 · 47 active engagements</span></span>
+      <a href="#" class="btn btn-ghost" data-i18n="nav_signin">Sign in</a>
+      <a href="#" class="btn btn-primary" data-i18n="nav_request">Request access →</a>
     </div>
   </div>
 </header>
@@ -3452,6 +3520,174 @@ the user table with production (<span class="comment">verified via
       btn.appendChild(ripple);
       setTimeout(() => ripple.remove(), 700);
     });
+  });
+
+  // === V7 — i18n runtime (EN / FR) ===
+  // Load i18n dictionary
+  const i18nScript = document.createElement('script');
+  i18nScript.src = 'i18n.js';
+  document.head.appendChild(i18nScript);
+
+  let currentLang = localStorage.getItem('bulwark-lang') || (navigator.language?.startsWith('fr') ? 'fr' : 'en');
+
+  function applyI18n(lang) {
+    const dict = window.__I18N__?.[lang];
+    if (!dict) return;
+    document.documentElement.setAttribute('lang', lang);
+
+    // text content
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      const val = dict[key];
+      if (typeof val === 'string') el.textContent = val;
+    });
+
+    // aria-label
+    document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+      const key = el.getAttribute('data-i18n-aria');
+      const val = dict[key];
+      if (typeof val === 'string') el.setAttribute('aria-label', val);
+    });
+
+    // title + meta description
+    if (dict.doc_title) document.title = dict.doc_title;
+    const desc = document.querySelector('meta[name="description"]');
+    if (desc && dict.doc_desc) desc.setAttribute('content', dict.doc_desc);
+
+    // hero tagline rotation
+    if (dict.hero_h1_rotations) {
+      taglineRotations = dict.hero_h1_rotations;
+      taglineIdx = 0;
+      const taglineEl = document.querySelector('.tagline-word.active');
+      if (taglineEl) taglineEl.textContent = taglineRotations[0];
+    }
+
+    // audit log feed (regenerate with current lang keys where applicable)
+    auditEntries = dict.hero_h1_rotations ? generateAuditEntries(lang) : auditEntries;
+
+    // Lang toggle visual
+    const current = document.getElementById('lang-current');
+    const alt = document.querySelector('.lang-toggle .lang-alt');
+    if (current && alt) {
+      if (lang === 'en') { current.textContent = 'EN'; alt.textContent = 'FR'; }
+      else { current.textContent = 'FR'; alt.textContent = 'EN'; }
+    }
+
+    // Announce to screen readers
+    announce(lang === 'en' ? 'Language switched to English' : 'Langue changée en français');
+
+    localStorage.setItem('bulwark-lang', lang);
+
+    // Update URL hint
+    if (lang === 'fr') {
+      const url = new URL(location.href);
+      url.searchParams.set('lang', 'fr');
+      history.replaceState(null, '', url);
+    } else {
+      const url = new URL(location.href);
+      url.searchParams.delete('lang');
+      history.replaceState(null, '', url);
+    }
+  }
+
+  function generateAuditEntries(lang) {
+    // Multilingual audit lines (keeps technical EN tokens, translates commentary)
+    if (lang === 'fr') {
+      return [
+        { ts: '21:04:18', html: '<span class="ts">21:04:18</span> <span class="scope">[scope]</span> validé · 47 hôtes in-scope · 3 ignorés <span class="hash">· sha256:a3f9c1d</span>' },
+        { ts: '21:04:31', html: '<span class="ts">21:04:31</span> <span class="scope">[recon]</span> énumération sous-domaines · cert-transparency · ASN map <span class="hash">· sha256:b21e0f4</span>' },
+        { ts: '21:07:02', html: '<span class="ts">21:07:02</span> <span class="scope">[recon]</span> 12 services découverts · 3 dev/staging in-scope <span class="hash">· sha256:c83a1e7</span>' },
+        { ts: '21:07:14', html: '<span class="ts">21:07:14</span> <span class="scope">[match]</span> scan vuln · 14,302 templates · vendor-aware <span class="hash">· sha256:d4f9c2e</span>' },
+        { ts: '21:11:45', html: '<span class="ts">21:11:45</span> <span class="warn">[!]</span> <span class="warn">CVE-2025-24813</span> candidat · Apache Solr · RCE atteignable <span class="hash">· sha256:e6b3a91</span>' },
+        { ts: '21:14:22', html: '<span class="ts">21:14:22</span> <span class="crit">[!]</span> <span class="crit">CRITIQUE</span> bypass auth · staging.acme.io · CVSS 9.1 <span class="hash">· sha256:f8c4712</span>' },
+        { ts: '21:17:08', html: '<span class="ts">21:17:08</span> <span class="scope">[verify]</span> reproduction FINDING-014 · payload: cve-2025-09382 <span class="hash">· sha256:9f2a8b3</span>' },
+        { ts: '21:18:09', html: '<span class="ts">21:18:09</span> <span class="ok">✓</span> exploit vérifié · preuve capturée · sha256:9f2a...c4b1 <span class="hash">· sha256:11d4e8f</span>' },
+        { ts: '21:18:11', html: '<span class="ts">21:18:11</span> <span class="dim">résumé · 3 résultats · 1 critique · 2 moyens · 0 faible</span> <span class="hash">· sha256:22e5f9a</span>' },
+        { ts: '21:18:14', html: '<span class="ts">21:18:14</span> <span class="scope">[report]</span> génération md/json/pdf · cosign-signé <span class="hash">· sha256:33f6a0b</span>' },
+        { ts: '21:19:02', html: '<span class="ts">21:19:02</span> <span class="ok">✓</span> rapport livré au scope owner · engagement scellé <span class="hash">· sha256:4407b1c</span>' },
+      ];
+    }
+    // Default English (kept identical to original)
+    return [
+      { ts: '21:04:18', html: '<span class="ts">21:04:18</span> <span class="scope">[scope]</span> validated · 47 hosts in-scope · 3 skipped <span class="hash">· sha256:a3f9c1d</span>' },
+      { ts: '21:04:31', html: '<span class="ts">21:04:31</span> <span class="scope">[recon]</span> subdomain enum · cert-transparency · ASN mapping <span class="hash">· sha256:b21e0f4</span>' },
+      { ts: '21:07:02', html: '<span class="ts">21:07:02</span> <span class="scope">[recon]</span> 12 services discovered · 3 dev/staging hosts in-scope <span class="hash">· sha256:c83a1e7</span>' },
+      { ts: '21:07:14', html: '<span class="ts">21:07:14</span> <span class="scope">[match]</span> vuln scan · 14,302 templates loaded · vendor-aware <span class="hash">· sha256:d4f9c2e</span>' },
+      { ts: '21:11:45', html: '<span class="ts">21:11:45</span> <span class="warn">[!]</span> <span class="warn">CVE-2025-24813</span> candidate · Apache Solr · RCE reachable <span class="hash">· sha256:e6b3a91</span>' },
+      { ts: '21:14:22', html: '<span class="ts">21:14:22</span> <span class="crit">[!]</span> <span class="crit">CRITICAL</span> auth bypass · staging.acme.io · CVSS 9.1 <span class="hash">· sha256:f8c4712</span>' },
+      { ts: '21:17:08', html: '<span class="ts">21:17:08</span> <span class="scope">[verify]</span> reproducing FINDING-014 · payload: cve-2025-09382 <span class="hash">· sha256:9f2a8b3</span>' },
+      { ts: '21:18:09', html: '<span class="ts">21:18:09</span> <span class="ok">✓</span> exploit verified · evidence captured · sha256:9f2a...c4b1 <span class="hash">· sha256:11d4e8f</span>' },
+      { ts: '21:18:11', html: '<span class="ts">21:18:11</span> <span class="dim">summary · 3 findings · 1 critical · 2 medium · 0 low</span> <span class="hash">· sha256:22e5f9a</span>' },
+      { ts: '21:18:14', html: '<span class="ts">21:18:14</span> <span class="scope">[report]</span> generating md/json/pdf · cosign-signed <span class="hash">· sha256:33f6a0b</span>' },
+      { ts: '21:19:02', html: '<span class="ts">21:19:02</span> <span class="ok">✓</span> report shipped to scope owner · engagement sealed <span class="hash">· sha256:4407b1c</span>' },
+    ];
+  }
+
+  // Live region for a11y announcements
+  const announcer = document.createElement('div');
+  announcer.setAttribute('role', 'status');
+  announcer.setAttribute('aria-live', 'polite');
+  announcer.setAttribute('aria-atomic', 'true');
+  announcer.className = 'sr-only';
+  document.body.appendChild(announcer);
+  function announce(msg) {
+    announcer.textContent = '';
+    setTimeout(() => { announcer.textContent = msg; }, 50);
+  }
+
+  // Apply initial lang once dictionary is loaded
+  i18nScript.addEventListener('load', () => {
+    // Check URL param first
+    const params = new URLSearchParams(location.search);
+    const urlLang = params.get('lang');
+    if (urlLang === 'fr' || urlLang === 'en') currentLang = urlLang;
+    applyI18n(currentLang);
+
+    // Hook toggle button
+    const langBtn = document.getElementById('lang-toggle');
+    if (langBtn) {
+      langBtn.addEventListener('click', () => {
+        currentLang = currentLang === 'en' ? 'fr' : 'en';
+        applyI18n(currentLang);
+      });
+    }
+  });
+
+  // === V7 — Keyboard nav (arrow keys for tabs, esc for menu) ===
+  document.querySelectorAll('[role="tablist"]').forEach(tablist => {
+    const items = tablist.querySelectorAll('[role="tab"], .tab-item');
+    items.forEach((item, idx) => {
+      item.setAttribute('tabindex', idx === 0 ? '0' : '-1');
+      item.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          const next = items[(idx + 1) % items.length];
+          next.focus();
+          next.click();
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          const prev = items[(idx - 1 + items.length) % items.length];
+          prev.focus();
+          prev.click();
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          items[0].focus();
+          items[0].click();
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          items[items.length - 1].focus();
+          items[items.length - 1].click();
+        }
+      });
+    });
+  });
+
+  // === V7 — ESC closes modals (toast dismissable) ===
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const toast = document.getElementById('toast');
+      if (toast?.classList.contains('show')) toast.classList.remove('show');
+    }
   });
 </script>
 
