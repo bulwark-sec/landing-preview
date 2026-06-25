@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="index, follow">
+<title>BULWARK Blog — Pentest, engineering, and security research</title>
+<meta name="description" content="Notes from the BULWARK team on autonomous pentesting, methodology, vulnerability research, and security engineering.">
+<link rel="canonical" href="https://bulwark-sec.github.io/landing-preview/blog/">
+<meta property="og:title" content="BULWARK Blog — Pentest, engineering, and security research">
+<meta property="og:description" content="Notes from the BULWARK team on autonomous pentesting, methodology, vulnerability research, and security engineering.">
+<meta property="og:url" content="https://bulwark-sec.github.io/landing-preview/blog/">
+<meta property="og:image" content="https://bulwark-sec.github.io/landing-preview/og-image.svg">
+<link rel="alternate" type="application/rss+xml" title="BULWARK Blog" href="/landing-preview/blog/rss.xml">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{background:#FAFAFA;color:#0A0A0A;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.55;letter-spacing:-.01em}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.wrap{max-width:840px;margin:0 auto;padding:32px}
+header{padding:24px 0;border-bottom:1px solid rgba(0,0,0,.08);margin-bottom:48px}
+.logo{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:#0A0A0A;font-family:ui-monospace,monospace;font-weight:600;font-size:13px}
+.logo-mark{width:24px;height:24px;background:#0A0A0A;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;border-radius:5px}
+.back{display:inline-block;font-family:ui-monospace,monospace;font-size:11px;color:rgba(10,10,10,.55);text-decoration:none;margin-bottom:32px;letter-spacing:.02em}
+.back:hover{color:#0A0A0A}
+h1{font-size:48px;font-weight:700;letter-spacing:-.035em;line-height:1.05;margin-bottom:12px}
+.lede{font-size:16px;color:rgba(10,10,10,.55);max-width:60ch;margin-bottom:48px}
+.posts{display:flex;flex-direction:column;gap:1px;background:rgba(0,0,0,.08);border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden}
+.post{background:#FAFAFA;padding:28px;display:grid;grid-template-columns:140px 1fr auto;gap:24px;align-items:center;text-decoration:none;color:inherit;transition:background 200ms ease}
+.post:hover{background:#fff}
+.post-date{font-family:ui-monospace,monospace;font-size:11px;color:rgba(10,10,10,.4);letter-spacing:.02em}
+.post-title{font-size:18px;font-weight:600;letter-spacing:-.015em;margin-bottom:4px}
+.post-sub{font-size:13.5px;color:rgba(10,10,10,.55);line-height:1.5}
+.post-arrow{font-family:ui-monospace,monospace;font-size:14px;color:rgba(10,10,10,.3);transition:transform 250ms cubic-bezier(.34,1.56,.64,1)}
+.post:hover .post-arrow{transform:translateX(4px);color:#0A0A0A}
+.post-tag{display:inline-block;margin-right:8px;padding:2px 7px;background:rgba(58,90,122,.08);border-radius:980px;font-family:ui-monospace,monospace;font-size:10px;color:#3A5A7A;text-transform:uppercase;letter-spacing:.06em;vertical-align:2px}
+.empty{padding:48px;text-align:center;color:rgba(10,10,10,.4);font-family:ui-monospace,monospace;font-size:12px}
+@media (max-width:640px){.post{grid-template-columns:1fr;gap:8px}.post-arrow{display:none}h1{font-size:36px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a href="/landing-preview/" class="logo">
+      <span class="logo-mark">B</span>
+      <span>bulwark</span>
+    </a>
+  </header>
+
+  <a href="/landing-preview/" class="back">← back to bulwark</a>
+
+  <h1>Engineering notes.</h1>
+  <p class="lede">From the team building BULWARK — methodology, vulnerability research, and what we learn from running 47 engagements per quarter.</p>
+
+  <div class="posts">
+    <a class="post" href="#">
+      <div class="post-date">2026-06-22</div>
+      <div>
+        <div class="post-title"><span class="post-tag">engineering</span>Why we hash-chain the audit log</div>
+        <div class="post-sub">Tamper-evident, append-only, replayable from cold storage. The boring engineering behind the trust model.</div>
+      </div>
+      <div class="post-arrow">→</div>
+    </a>
+    <a class="post" href="#">
+      <div class="post-date">2026-06-15</div>
+      <div>
+        <div class="post-title"><span class="post-tag">research</span>Mapping 12,000 subdomains in 14 seconds</div>
+        <div class="post-sub">How we parallelize reconnaissance without hitting rate limits or getting blocked.</div>
+      </div>
+      <div class="post-arrow">→</div>
+    </a>
+    <a class="post" href="#">
+      <div class="post-date">2026-06-08</div>
+      <div>
+        <div class="post-title"><span class="post-tag">vuln</span>CVE-2025-09382 — auth bypass on staging</div>
+        <div class="post-sub">Root-cause analysis of an auth bypass we found in a major B2B SaaS, disclosed with vendor cooperation.</div>
+      </div>
+      <div class="post-arrow">→</div>
+    </a>
+    <a class="post" href="#">
+      <div class="post-date">2026-05-30</div>
+      <div>
+        <div class="post-title"><span class="post-tag">methodology</span>Stack fingerprinting before template matching</div>
+        <div class="post-sub">Why firing 38k templates at every host is the wrong move, and what we do instead.</div>
+      </div>
+      <div class="post-arrow">→</div>
+    </a>
+    <a class="post" href="#">
+      <div class="post-date">2026-05-22</div>
+      <div>
+        <div class="post-title"><span class="post-tag">engineering</span>Air-gap mode: how it works</div>
+        <div class="post-sub">Running BULWARK without internet egress. Payload set, signature verification, on-prem template updates.</div>
+      </div>
+      <div class="post-arrow">→</div>
+    </a>
+    <a class="post" href="#">
+      <div class="post-date">2026-05-15</div>
+      <div>
+        <div class="post-title"><span class="post-tag">process</span>Zero false positives since v3 — what changed</div>
+        <div class="post-sub">The verification-first pipeline that made "BULWARK said so" a defensible claim.</div>
+      </div>
+      <div class="post-arrow">→</div>
+    </a>
+  </div>
+
+  <p class="empty">// subscribe via <a href="/landing-preview/rss.xml" style="color:#0A0A0A">rss</a> · or follow on <a href="https://github.com/bulwark-sec" style="color:#0A0A0A">github</a></p>
+</div>
+</body>
+</html>
