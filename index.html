@@ -1,30 +1,282 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BULWARK — Pentest, on autopilot.</title>
-<meta name="description" content="Autonomous external pentest agent. Point it at an authorized target, walk away, come back to a clean report.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+
+<!-- Primary Meta Tags -->
+<title>BULWARK — Pentest, on autopilot. · Autonomous external pentest agent</title>
+<meta name="title" content="BULWARK — Pentest, on autopilot. · Autonomous external pentest agent">
+<meta name="description" content="Autonomous external pentest agent. Point BULWARK at an authorized target, walk away, come back to a clean report — confirmed exploits, CVSS scores, audit log for every step. SOC 2 Type II · ISO 27001 · GDPR compliant.">
+<meta name="keywords" content="pentest, penetration testing, security, cybersecurity, autonomous pentest, external pentest, BULWARK, vulnerability scanning, CVE, OWASP, getwark">
+<meta name="author" content="BULWARK SAS">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="googlebot" content="index, follow">
+<meta name="rating" content="general">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="application-name" content="BULWARK">
+<meta name="apple-mobile-web-app-title" content="BULWARK">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#FAFAFA" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0A0A0A" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+
+<!-- Canonical -->
+<link rel="canonical" href="https://bulwark-sec.github.io/landing-preview/">
+<link rel="alternate" hreflang="en" href="https://bulwark-sec.github.io/landing-preview/">
+<link rel="alternate" hreflang="fr" href="https://bulwark-sec.github.io/landing-preview/?lang=fr">
+<link rel="alternate" hreflang="x-default" href="https://bulwark-sec.github.io/landing-preview/">
+
+<!-- Sitemap & feeds -->
+<link rel="sitemap" type="application/xml" href="/landing-preview/sitemap.xml">
+<link rel="alternate" type="application/rss+xml" title="BULWARK changelog" href="/landing-preview/rss.xml">
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="BULWARK">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="fr_FR">
 <meta property="og:title" content="BULWARK — Pentest, on autopilot.">
 <meta property="og:description" content="Autonomous external pentest agent. Point it at an authorized target, walk away, come back to a clean report.">
 <meta property="og:url" content="https://bulwark-sec.github.io/landing-preview/">
 <meta property="og:image" content="https://bulwark-sec.github.io/landing-preview/og-image.svg">
+<meta property="og:image:secure_url" content="https://bulwark-sec.github.io/landing-preview/og-image.svg">
+<meta property="og:image:type" content="image/svg+xml">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="BULWARK — autonomous external pentest agent">
+<meta property="og:image:alt" content="BULWARK — autonomous external pentest agent, geometric mark on warm white background">
+
+<!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@bulwark_sec">
+<meta name="twitter:creator" content="@bulwark_sec">
+<meta name="twitter:title" content="BULWARK — Pentest, on autopilot.">
+<meta name="twitter:description" content="Autonomous external pentest agent. Point it at an authorized target, walk away, come back to a clean report.">
 <meta name="twitter:image" content="https://bulwark-sec.github.io/landing-preview/og-image.svg">
+<meta name="twitter:image:alt" content="BULWARK — autonomous external pentest agent">
+<meta name="twitter:domain" content="getwark.com">
+<meta name="twitter:url" content="https://bulwark-sec.github.io/landing-preview/">
 
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230A0A0A'/><text x='16' y='22' font-family='sans-serif' font-weight='900' font-size='20' fill='%23ffffff' text-anchor='middle'>B</text></svg>">
+<!-- App links -->
+<meta property="al:ios:app_name" content="BULWARK">
+<meta property="al:android:app_name" content="BULWARK">
 
+<!-- Performance hints -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://api.github.com" crossorigin>
+<link rel="dns-prefetch" href="https://fonts.googleapis.com">
+<link rel="dns-prefetch" href="https://fonts.gstatic.com">
+
+<!-- Fonts (display=swap for fast first paint) -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Preload hero image -->
+<link rel="preload" as="image" href="hero-product.png" fetchpriority="high">
+
+<!-- Favicon (data URI, no extra request) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230A0A0A'/><text x='16' y='22' font-family='sans-serif' font-weight='900' font-size='20' fill='%23ffffff' text-anchor='middle'>B</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' fill='%230A0A0A'/><text x='90' y='120' font-family='sans-serif' font-weight='900' font-size='110' fill='%23ffffff' text-anchor='middle'>B</text></svg>">
+
+<!-- PWA manifest -->
+<link rel="manifest" href="/landing-preview/manifest.json">
+
+<!-- Structured data: Organization -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "BULWARK",
+  "legalName": "Bulwark SAS",
+  "url": "https://getwark.com",
+  "logo": "https://bulwark-sec.github.io/landing-preview/og-image.svg",
+  "description": "Autonomous external pentest agent. Point it at an authorized target, walk away, come back to a clean report.",
+  "foundingDate": "2023",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Paris",
+    "addressCountry": "FR"
+  },
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "contactType": "customer support",
+    "email": "hello@getwark.com",
+    "availableLanguage": ["English", "French"]
+  }, {
+    "@type": "ContactPoint",
+    "contactType": "security",
+    "email": "security@getwark.com",
+    "availableLanguage": ["English", "French"]
+  }, {
+    "@type": "ContactPoint",
+    "contactType": "disclosure",
+    "url": "https://disclosure.getwark.com",
+    "availableLanguage": ["English"]
+  }],
+  "sameAs": [
+    "https://github.com/bulwark-sec",
+    "https://x.com/bulwark_sec"
+  ],
+  "identifier": "https://bulwark-sec.github.io/landing-preview/#organization"
+}
+</script>
+
+<!-- Structured data: SoftwareApplication -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "BULWARK",
+  "applicationCategory": "SecurityApplication",
+  "applicationSubCategory": "Penetration Testing Software",
+  "operatingSystem": "Linux, macOS, Docker",
+  "description": "Autonomous external pentest agent. Maps an authorized target, exploits what it can, confirms every finding with real evidence, hands back an audit-logged report.",
+  "url": "https://getwark.com",
+  "downloadUrl": "https://getwark.com/cli",
+  "screenshot": "https://bulwark-sec.github.io/landing-preview/og-image.svg",
+  "softwareVersion": "5.32",
+  "dateModified": "2026-06-22",
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "Starter",
+      "price": "4900",
+      "priceCurrency": "USD",
+      "description": "One-time scoped sweep, up to 25 hosts, 14-day delivery"
+    },
+    {
+      "@type": "Offer",
+      "name": "Continuous",
+      "price": "28000",
+      "priceCurrency": "USD",
+      "description": "Quarterly ongoing coverage, unlimited hosts, 24h triage SLA"
+    },
+    {
+      "@type": "Offer",
+      "name": "Enterprise",
+      "description": "Custom pricing for air-gapped, regulated deployments"
+    }
+  ],
+  "featureList": [
+    "12-phase deterministic pipeline",
+    "47 recon sources, daily refresh",
+    "38,000+ detection templates",
+    "Zero false positives since v3",
+    "SHA-256 hash-chained audit log",
+    "Three report formats (md/json/pdf)",
+    "SOC 2 Type II, ISO 27001, GDPR compliant"
+  ]
+}
+</script>
+
+<!-- Structured data: FAQPage -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is BULWARK a SaaS or on-prem?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Both. Starter and Continuous run on our hosted runner (loopback-only, egress-pinned). Enterprise gets a binary that runs in your VPC or air-gapped — same code, no telemetry."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do you do internal pentests?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No — BULWARK is external-only. For internal assessments, we partner with two firms we trust; ask us for an intro."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What if BULWARK finds nothing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "That's a real outcome, and we report it as such — no padding. You get a signed attestation instead, useful for compliance."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do you handle out-of-scope hits?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Logged, skipped, never exploited. Every out-of-scope detection is hashed and added to the audit log so you can verify the agent saw it and moved on."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I see a sample report?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes — sanitized redacted samples are in the docs. For a tailored sample scoped to your stack, ask in the scoping call."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's your false positive rate?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Zero false positives in delivered reports since v3 (Q1 2024). Every finding is reproducibly verified before it ships. Candidates that don't verify are dropped from the report entirely."
+      }
+    }
+  ]
+}
+</script>
+
+<!-- Structured data: BreadcrumbList -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://bulwark-sec.github.io/landing-preview/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Product",
+      "item": "https://bulwark-sec.github.io/landing-preview/#capabilities"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Pricing",
+      "item": "https://bulwark-sec.github.io/landing-preview/#pricing"
+    }
+  ]
+}
+</script>
+
+<!-- Structured data: WebSite with SearchAction -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "BULWARK",
+  "url": "https://bulwark-sec.github.io/landing-preview/",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://bulwark-sec.github.io/landing-preview/search?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
 <style>
   /* ============================================================
      BULWARK landing V3 — full content + dense animations
@@ -2573,6 +2825,15 @@ the user table with production (<span class="comment">verified via
 </main>
 
 <script>
+  // Register service worker for PWA + offline support
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/landing-preview/sw.js', { scope: '/landing-preview/' })
+        .then(reg => console.log('[sw] registered:', reg.scope))
+        .catch(err => console.warn('[sw] failed:', err));
+    });
+  }
+
   // Mark JS ready + page loaded
   document.documentElement.classList.add('js-ready');
   requestAnimationFrame(() => {
