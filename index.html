@@ -3784,7 +3784,7 @@ Run 'bulwark &lt;command&gt; --help' for details.</pre>
   // === Live audit log feed ===
   // Generates realistic-looking audit entries on a loop
   const auditFeed = document.getElementById('audit-feed');
-  const auditEntries = [
+  let auditEntries = [
     { ts: '21:04:18', html: '<span class="ts">21:04:18</span> <span class="scope">[scope]</span> validated · 47 hosts in-scope · 3 skipped <span class="hash">· sha256:a3f9c1d</span>' },
     { ts: '21:04:31', html: '<span class="ts">21:04:31</span> <span class="scope">[recon]</span> subdomain enum · cert-transparency · ASN mapping <span class="hash">· sha256:b21e0f4</span>' },
     { ts: '21:07:02', html: '<span class="ts">21:07:02</span> <span class="scope">[recon]</span> 12 services discovered · 3 dev/staging hosts in-scope <span class="hash">· sha256:c83a1e7</span>' },
