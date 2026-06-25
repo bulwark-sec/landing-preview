@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<channel>
+  <title>BULWARK — Changelog</title>
+  <link>https://bulwark-sec.github.io/landing-preview/#changelog</link>
+  <description>Public changelog for BULWARK, the autonomous external pentest agent. Releases, fixes, security advisories.</description>
+  <language>en-us</language>
+  <copyright>© 2026 Bulwark SAS</copyright>
+  <managingEditor>security@getwark.com (Bulwark Security)</managingEditor>
+  <webMaster>hello@getwark.com (Bulwark Team)</webMaster>
+  <lastBuildDate>Wed, 25 Jun 2026 12:00:00 +0000</lastBuildDate>
+  <ttl>60</ttl>
+  <atom:link href="https://bulwark-sec.github.io/landing-preview/rss.xml" rel="self" type="application/rss+xml"/>
+  <image>
+    <url>https://bulwark-sec.github.io/landing-preview/og-image.svg</url>
+    <title>BULWARK</title>
+    <link>https://bulwark-sec.github.io/landing-preview/</link>
+    <width>1200</width>
+    <height>630</height>
+  </image>
+
+  <item>
+    <title>v5.32 — STIX 2.1 export for SIEM ingest</title>
+    <link>https://bulwark-sec.github.io/landing-preview/#changelog</link>
+    <guid isPermaLink="false">bulwark-v5.32-stix-export</guid>
+    <pubDate>Sun, 22 Jun 2026 00:00:00 +0000</pubDate>
+    <category>added</category>
+    <description><![CDATA[Findings now drop into Splunk, Elastic, Sentinel without custom glue. STIX 2.1 bundles emitted per engagement, with TLP:AMBER default and optional TLP:GREEN for public reports.]]></description>
+    <content:encoded><![CDATA[<p>Findings now drop into Splunk, Elastic, Sentinel without custom glue. STIX 2.1 bundles emitted per engagement, with TLP:AMBER default and optional TLP:GREEN for public reports.</p>]]></content:encoded>
+  </item>
+
+  <item>
+    <title>v5.31 — Faster CVE matching</title>
+    <link>https://bulwark-sec.github.io/landing-preview/#changelog</link>
+    <guid isPermaLink="false">bulwark-v5.31-cve-refresh</guid>
+    <pubDate>Mon, 15 Jun 2026 00:00:00 +0000</pubDate>
+    <category>improved</category>
+    <description><![CDATA[CVE matching refreshed daily instead of weekly — 18% faster time-to-detect on emerging CVEs.]]></description>
+  </item>
+
+  <item>
+    <title>v5.30 — Air-gap approved payload set</title>
+    <link>https://bulwark-sec.github.io/landing-preview/#changelog</link>
+    <guid isPermaLink="false">bulwark-v5.30-airgap</guid>
+    <pubDate>Mon, 08 Jun 2026 00:00:00 +0000</pubDate>
+    <category>added</category>
+    <description><![CDATA[Air-gap approved payload set for Enterprise deployments — runs without internet egress.]]></description>
+  </item>
+
+  <item>
+    <title>v5.29.1 — CDN wildcard fix</title>
+    <link>https://bulwark-sec.github.io/landing-preview/#changelog</link>
+    <guid isPermaLink="false">bulwark-v5.29.1-cdn-fix</guid>
+    <pubDate>Sat, 30 May 2026 00:00:00 +0000</pubDate>
+    <category>fixed</category>
+    <description><![CDATA[Out-of-scope host detection no longer false-positives on CDNs with wildcard DNS records.]]></description>
+  </item>
+
+  <item>
+    <title>v5.29 — Close-the-loop workflow</title>
+    <link>https://bulwark-sec.github.io/landing-preview/#changelog</link>
+    <guid isPermaLink="false">bulwark-v5.29-close-loop</guid>
+    <pubDate>Fri, 22 May 2026 00:00:00 +0000</pubDate>
+    <category>added</category>
+    <description><![CDATA[Close-the-loop workflow — BULWARK opens a PR with the fix and auto-verifies on your staging.]]></description>
+  </item>
+
+</channel>
+</rss>
