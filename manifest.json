@@ -1,0 +1,64 @@
+{
+  "name": "BULWARK — Autonomous External Pentest",
+  "short_name": "BULWARK",
+  "description": "Autonomous external pentest agent. Point it at an authorized target, walk away, come back to a clean report.",
+  "start_url": "/landing-preview/",
+  "scope": "/landing-preview/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FAFAFA",
+  "theme_color": "#FAFAFA",
+  "categories": ["security", "business", "productivity", "developer"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%230A0A0A' rx='32'/><text x='96' y='128' font-family='sans-serif' font-weight='900' font-size='120' fill='%23ffffff' text-anchor='middle'>B</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%230A0A0A' rx='96'/><text x='256' y='344' font-family='sans-serif' font-weight='900' font-size='320' fill='%23ffffff' text-anchor='middle'>B</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Pricing",
+      "short_name": "Pricing",
+      "url": "/landing-preview/#pricing",
+      "description": "See pricing tiers and request scoped engagement"
+    },
+    {
+      "name": "Sample report",
+      "short_name": "Sample",
+      "url": "/landing-preview/#sample-report",
+      "description": "View a sample BULWARK finding"
+    },
+    {
+      "name": "Methodology",
+      "short_name": "Method",
+      "url": "/landing-preview/#methodology",
+      "description": "Read the methodology"
+    },
+    {
+      "name": "Changelog",
+      "short_name": "Changelog",
+      "url": "/landing-preview/#changelog",
+      "description": "Recent releases and updates"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://bulwark-sec.github.io/landing-preview/og-image.svg",
+      "sizes": "1200x630",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "BULWARK landing page"
+    }
+  ],
+  "prefer_related_applications": false
+}
