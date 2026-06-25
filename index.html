@@ -5,6 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BULWARK — Pentest, on autopilot.</title>
 <meta name="description" content="Autonomous external pentest agent. Point it at an authorized target, walk away, come back to a clean report.">
+<meta name="theme-color" content="#FAFAFA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0A0A" media="(prefers-color-scheme: dark)">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="BULWARK — Pentest, on autopilot.">
+<meta property="og:description" content="Autonomous external pentest agent. Point it at an authorized target, walk away, come back to a clean report.">
+<meta property="og:url" content="https://bulwark-sec.github.io/landing-preview/">
+<meta property="og:image" content="https://bulwark-sec.github.io/landing-preview/og-image.svg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="BULWARK — autonomous external pentest agent">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bulwark-sec.github.io/landing-preview/og-image.svg">
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230A0A0A'/><text x='16' y='22' font-family='sans-serif' font-weight='900' font-size='20' fill='%23ffffff' text-anchor='middle'>B</text></svg>">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1134,6 +1151,7 @@
     .hero h1 { font-size: 56px; }
     .stats-grid { grid-template-columns: 1fr 1fr; }
     .how-steps, .tiers { grid-template-columns: 1fr; }
+    .not-do-grid { grid-template-columns: 1fr; }
     .cap-row { grid-template-columns: 50px 1fr; gap: 16px; }
     .cap-row .cap-desc, .cap-row .cap-meta { display: none; }
     .comp-row { grid-template-columns: 1fr; }
@@ -1142,9 +1160,387 @@
     .foot-grid { grid-template-columns: 1fr 1fr; }
     .nav-links { display: none; }
     .audit-feed { height: 160px; }
+    .live-counter { position: static; margin-bottom: 16px; min-width: 0; }
+    .hero-shot-wrap { display: flex; flex-direction: column-reverse; }
+    .arch-schema { padding: 16px; }
+    .trend-chart { padding: 16px 20px; }
+    .toast { left: 16px; right: 16px; bottom: 16px; min-width: 0; }
+    .cursor-follower { display: none; }
+    * { cursor: auto !important; }
+    .toast, .toast:hover { cursor: pointer !important; }
   }
 
-  /* === Reduce motion === */
+  /* === Skip link === */
+  .skip-link {
+    position: absolute; top: -100px; left: 16px;
+    background: var(--color-fg);
+    color: var(--color-on-accent);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px; font-weight: 500;
+    z-index: 200;
+    transition: top 150ms var(--ease-smooth);
+  }
+  .skip-link:focus { top: 16px; }
+
+  /* === Page loader (initial fade-in) === */
+  .page-loader {
+    position: fixed; inset: 0; z-index: 300;
+    background: var(--color-bg);
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 500ms var(--ease-smooth) 100ms;
+  }
+  html.loaded .page-loader { opacity: 0; }
+
+  /* === Cursor follower (desktop only) === */
+  .cursor-follower {
+    position: fixed;
+    width: 32px; height: 32px;
+    border: 1px solid var(--color-fg);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 150;
+    transform: translate(-50%, -50%);
+    transition: width 250ms var(--ease-spring), height 250ms var(--ease-spring),
+                border-color 200ms var(--ease-smooth), background 200ms var(--ease-smooth);
+    mix-blend-mode: difference;
+    display: none;
+  }
+  .cursor-follower.hover { width: 56px; height: 56px; }
+  @media (hover: hover) and (pointer: fine) {
+    .cursor-follower { display: block; }
+    * { cursor: none; }
+    a, button, input, select, textarea, [role="button"] { cursor: none; }
+  }
+
+  /* === Theme toggle === */
+  .theme-toggle {
+    width: 32px; height: 32px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    color: var(--color-fg);
+    transition: all 200ms var(--ease-smooth);
+  }
+  .theme-toggle:hover {
+    background: var(--color-panel-2);
+    border-color: var(--color-border-strong);
+  }
+  .theme-toggle svg { transition: transform 400ms var(--ease-spring); }
+  .theme-toggle:hover svg { transform: rotate(20deg); }
+
+  /* === Tagline rotative === */
+  .tagline-rotate {
+    position: relative;
+    display: inline-block;
+    min-width: 280px;
+    vertical-align: bottom;
+  }
+  .tagline-word {
+    position: absolute;
+    top: 0; left: 0;
+    opacity: 0;
+    transform: translateY(20%);
+    transition: opacity 500ms var(--ease-smooth), transform 500ms var(--ease-spring);
+  }
+  .tagline-word.active {
+    opacity: 1;
+    transform: translateY(0);
+    position: relative;
+  }
+
+  /* === Trend chart === */
+  .trend-chart {
+    margin-top: 56px;
+    padding: 24px 28px 16px;
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+  .trend-header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 12px;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .trend-title {
+    font-size: 14px; font-weight: 500;
+    color: var(--color-fg);
+  }
+  .trend-sub {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--color-muted-2);
+    margin-top: 2px;
+    letter-spacing: 0.02em;
+  }
+  .trend-legend {
+    display: flex; gap: 16px; align-items: center;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--color-muted-2);
+    letter-spacing: 0.02em;
+  }
+  .trend-legend span:not([class]) { display: inline-flex; align-items: center; gap: 4px; }
+  .trend-legend .dot-crit, .trend-legend .dot-high, .trend-legend .dot-med, .trend-legend .dot-low {
+    width: 8px; height: 8px; border-radius: 50%;
+    display: inline-block; margin-right: 4px;
+  }
+  .trend-legend .dot-crit { background: var(--sev-critical); }
+  .trend-legend .dot-high { background: var(--sev-high); }
+  .trend-legend .dot-med  { background: var(--sev-medium); }
+  .trend-legend .dot-low  { background: var(--sev-low); }
+  .trend-svg {
+    width: 100%; height: 140px;
+    display: block;
+  }
+  .trend-area {
+    opacity: 0;
+    transform-origin: left center;
+    animation: trend-draw 1.4s var(--ease-smooth) 200ms forwards;
+  }
+  .trend-area.crit { animation-delay: 200ms; fill: var(--sev-critical); fill-opacity: 0.85; }
+  .trend-area.high { animation-delay: 350ms; fill: var(--sev-high);     fill-opacity: 0.85; }
+  .trend-area.med  { animation-delay: 500ms; fill: var(--sev-medium);   fill-opacity: 0.85; }
+  .trend-area.low  { animation-delay: 650ms; fill: var(--sev-low);      fill-opacity: 0.85; }
+  @keyframes trend-draw {
+    from { opacity: 0; transform: scaleX(0); }
+    to { opacity: 0.85; transform: scaleX(1); }
+  }
+  .trend-axis {
+    display: flex; justify-content: space-between;
+    margin-top: 8px;
+    font-size: 10px;
+    color: var(--color-muted-2);
+    letter-spacing: 0.04em;
+  }
+
+  /* === Architecture === */
+  .arch-schema {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-panel);
+    padding: 32px;
+    overflow-x: auto;
+    box-shadow: var(--shadow-card);
+  }
+  .arch-schema svg {
+    width: 100%; height: auto;
+    max-width: 1100px;
+    display: block;
+    margin: 0 auto;
+  }
+  .arch-node rect { transition: transform 250ms var(--ease-spring), filter 250ms var(--ease-smooth); }
+  .arch-node:hover rect { filter: drop-shadow(0 8px 16px rgba(0,0,0,0.08)); }
+  .arch-node-primary rect { animation: arch-pulse 4s ease-in-out infinite; }
+  @keyframes arch-pulse {
+    0%, 100% { stroke: rgba(0,0,0,0); stroke-width: 0; }
+    50% { stroke: rgba(0,113,227,0.4); stroke-width: 1; }
+  }
+  .arch-foot {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border);
+    font-size: 11px;
+    color: var(--color-muted-2);
+    letter-spacing: 0.02em;
+  }
+
+  /* === What we don't do === */
+  .not-do-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--color-border);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+  .not-do-item {
+    background: var(--color-bg);
+    padding: 28px;
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    gap: 16px;
+    align-items: start;
+    transition: background 200ms var(--ease-smooth);
+  }
+  .not-do-item:hover { background: #FFFFFF; }
+  .not-do-num {
+    font-family: 'Geist Mono', monospace;
+    font-size: 18px;
+    color: var(--sev-critical);
+    font-weight: 500;
+    padding-top: 2px;
+  }
+  .not-do-title {
+    font-size: 16px; font-weight: 600;
+    color: var(--color-fg);
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .not-do-desc {
+    font-size: 13.5px; line-height: 1.55;
+    color: var(--color-muted);
+  }
+  .not-do-tag {
+    font-size: 10px;
+    color: var(--color-muted-2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+    align-self: start;
+  }
+
+  /* === Toast === */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--color-fg);
+    color: var(--color-on-accent);
+    padding: 14px 16px;
+    border-radius: 10px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    z-index: 80;
+    display: flex; gap: 12px; align-items: center;
+    min-width: 280px;
+    transform: translateY(120%);
+    opacity: 0;
+    transition: transform 500ms var(--ease-spring), opacity 400ms var(--ease-smooth);
+    cursor: pointer;
+  }
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .toast-icon {
+    width: 28px; height: 28px;
+    background: var(--sev-low);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .toast-title {
+    font-size: 13.5px; font-weight: 500;
+  }
+  .toast-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 2px;
+  }
+
+  /* === DARK MODE === */
+  html[data-theme="dark"] {
+    --color-bg:       #0A0A0A;
+    --color-fg:       #FAFAFA;
+    --color-muted:    rgba(250, 250, 250, 0.55);
+    --color-muted-2:  rgba(250, 250, 250, 0.40);
+    --color-panel:    rgba(20, 20, 20, 0.55);
+    --color-panel-2:  rgba(28, 28, 28, 0.70);
+    --color-border:   rgba(255, 255, 255, 0.08);
+    --color-border-strong: rgba(255, 255, 255, 0.16);
+    --color-accent:   #FFFFFF;
+    --color-on-accent: #0A0A0A;
+
+    --accent-blue:    #0a84ff;
+    --accent-blue-2:  #409cff;
+    --accent-blue-soft: rgba(10, 132, 255, 0.18);
+
+    --sev-critical: #FF453A;
+    --sev-high:     #FF9F0A;
+    --sev-medium:   #FFD60A;
+    --sev-low:      #30D158;
+    --sev-info:     #64D2FF;
+
+    --shadow-card: 0 1px 0 rgba(255,255,255,0.04) inset, 0 4px 16px rgba(0,0,0,0.32);
+    --shadow-card-hover: 0 1px 0 rgba(255,255,255,0.06) inset, 0 12px 28px rgba(0,0,0,0.44);
+  }
+  html[data-theme="dark"] .hero-bg-grid {
+    background-image: linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px);
+  }
+  html[data-theme="dark"] .live-counter {
+    background: rgba(28, 28, 30, 0.85);
+    backdrop-filter: blur(20px);
+    color: var(--color-fg);
+    border: 1px solid var(--color-border);
+  }
+  html[data-theme="dark"] .live-counter .lc-key { color: var(--color-muted); }
+  html[data-theme="dark"] .live-counter .lc-val { color: var(--color-fg); }
+  html[data-theme="dark"] .audit-strip { background: #FAFAFA; color: #0A0A0A; }
+  html[data-theme="dark"] .audit-strip .audit-header { color: rgba(0,0,0,0.5); border-bottom-color: rgba(0,0,0,0.08); }
+  html[data-theme="dark"] .audit-strip .audit-line { color: rgba(0,0,0,0.6); }
+  html[data-theme="dark"] .audit-strip .audit-line .ts { color: rgba(0,0,0,0.35); }
+  html[data-theme="dark"] .audit-strip .audit-line .scope { color: var(--sev-info); }
+  html[data-theme="dark"] .audit-strip .audit-line .ok { color: var(--sev-low); }
+  html[data-theme="dark"] .audit-strip .audit-line .warn { color: var(--sev-high); }
+  html[data-theme="dark"] .audit-strip .audit-line .crit { color: var(--sev-critical); }
+  html[data-theme="dark"] .audit-strip .audit-line .dim { color: rgba(0,0,0,0.4); }
+  html[data-theme="dark"] .audit-strip .audit-line .hash { color: rgba(0,0,0,0.45); }
+  html[data-theme="dark"] .cap-row { border-bottom-color: var(--color-border); }
+  html[data-theme="dark"] .cap-row:hover { background: rgba(255,255,255,0.025); }
+  html[data-theme="dark"] .report-card { background: rgba(28,28,30,0.55); }
+  html[data-theme="dark"] .report-block { background: rgba(0,0,0,0.3); }
+  html[data-theme="dark"] .how-step:hover { background: rgba(28,28,30,0.6); }
+  html[data-theme="dark"] .compliance-item { background: var(--color-bg); }
+  html[data-theme="dark"] .compliance-item:hover { background: rgba(28,28,30,0.6); }
+  html[data-theme="dark"] .tier { background: var(--color-bg); }
+  html[data-theme="dark"] .tier.featured { background: #FAFAFA; color: #0A0A0A; }
+  html[data-theme="dark"] .cta-banner { background: #FAFAFA; color: #0A0A0A; }
+  html[data-theme="dark"] .cta-banner p { color: rgba(0,0,0,0.6); }
+  html[data-theme="dark"] .cta-banner .btn-primary { background: #0A0A0A; color: #FAFAFA; }
+  html[data-theme="dark"] .cta-banner .btn-ghost { border-color: rgba(0,0,0,0.2); color: #0A0A0A; }
+  html[data-theme="dark"] .cta-banner .preflight { color: rgba(0,0,0,0.45); }
+  html[data-theme="dark"] .cta-banner::before {
+    background-image:
+      linear-gradient(to right, rgba(0,0,0,0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0,0,0,0.02) 1px, transparent 1px);
+  }
+  html[data-theme="dark"] .stat { border-left-color: var(--color-border); }
+  html[data-theme="dark"] .not-do-item { background: var(--color-bg); }
+  html[data-theme="dark"] .not-do-item:hover { background: rgba(28,28,30,0.6); }
+  html[data-theme="dark"] .trend-chart { background: rgba(28,28,30,0.55); }
+  html[data-theme="dark"] .trend-area.crit { fill-opacity: 0.6; }
+  html[data-theme="dark"] .trend-area.high { fill-opacity: 0.6; }
+  html[data-theme="dark"] .trend-area.med  { fill-opacity: 0.6; }
+  html[data-theme="dark"] .trend-area.low  { fill-opacity: 0.6; }
+  html[data-theme="dark"] .arch-schema { background: rgba(28,28,30,0.55); }
+  html[data-theme="dark"] .arch-schema .arch-node rect[fill="#fff"] { fill: rgba(28,28,30,0.7); }
+  html[data-theme="dark"] .arch-schema .arch-target rect[fill="#FAFAFA"] { fill: rgba(28,28,30,0.4); }
+  html[data-theme="dark"] .arch-schema text[fill="#0A0A0A"] { fill: var(--color-fg); }
+  html[data-theme="dark"] .arch-schema text[fill="#666"] { fill: var(--color-muted); }
+  html[data-theme="dark"] .arch-schema line[stroke="#999"] { stroke: rgba(255,255,255,0.4); }
+  html[data-theme="dark"] .toast { background: #FAFAFA; color: #0A0A0A; }
+  html[data-theme="dark"] .toast-title { color: #0A0A0A; }
+  html[data-theme="dark"] .toast-sub { color: rgba(0,0,0,0.6); }
+  html[data-theme="dark"] .comp-row:hover:not(.header) { background: rgba(255,255,255,0.02); }
+  html[data-theme="dark"] .comp-row.header { background: rgba(255,255,255,0.03); }
+  html[data-theme="dark"] .comp-cell .bulwark-cell { background: rgba(48, 209, 88, 0.06); border-left-color: var(--sev-low); }
+  html[data-theme="dark"] .changelog-row:hover { background: rgba(255,255,255,0.02); }
+  html[data-theme="dark"] .cl-tag.added { background: rgba(48, 209, 88, 0.12); }
+  html[data-theme="dark"] .cl-tag.fixed { background: rgba(255, 214, 10, 0.12); }
+  html[data-theme="dark"] .cl-tag.improved { background: rgba(10, 132, 255, 0.15); }
+  html[data-theme="dark"] .tab-pane { color: var(--color-fg); }
+  html[data-theme="dark"] .tab-content { background: rgba(28,28,30,0.55); }
+  html[data-theme="dark"] .tab-pane .cli { background: rgba(0,0,0,0.3); }
+  html[data-theme="dark"] .live-counter .lc-val { color: var(--color-fg); }
+
+  /* === Focus visible (a11y) === */
+  *:focus { outline: none; }
+  *:focus-visible {
+    outline: 2px solid var(--accent-blue);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  a:focus-visible, button:focus-visible { outline-offset: 3px; }
+
+  /* === Reduced motion === */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
@@ -1152,10 +1548,30 @@
     }
     .reveal { opacity: 1; transform: none; }
     html { scroll-behavior: auto; }
+    html.js-ready .reveal:not(.visible) { opacity: 1; transform: none; }
+    .cursor-follower { display: none; }
+    * { cursor: auto !important; }
   }
 </style>
 </head>
 <body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<!-- Cursor follower (desktop only) -->
+<div class="cursor-follower" id="cursor-follower" aria-hidden="true"></div>
+
+<!-- Page-load fade overlay -->
+<div class="page-loader" id="page-loader" aria-hidden="true"></div>
+
+<!-- Toast notification (bottom-right) -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <div class="toast-icon">✓</div>
+  <div class="toast-body">
+    <div class="toast-title">Your scout report is ready</div>
+    <div class="toast-sub">engagement <span class="mono">acme-q3</span> · 12 findings · view report →</div>
+  </div>
+</div>
 
 <div class="scroll-progress" id="scroll-progress"></div>
 
@@ -1175,12 +1591,19 @@
       <a href="#changelog">Changelog</a>
     </nav>
     <div class="nav-right">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-toggle-icon" data-mode="light">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </span>
+      </button>
       <span class="live"><span class="dot"></span> v5.32 · 47 active engagements</span>
       <a href="#" class="btn btn-ghost">Sign in</a>
       <a href="#" class="btn btn-primary">Request access →</a>
     </div>
   </div>
 </header>
+
+<main id="main">
 
 <!-- HERO -->
 <section class="hero" style="border-top: none;">
@@ -1193,7 +1616,11 @@
         </div>
         <h1>
           Pentest,<br>
-          on <span class="accent">autopilot.</span>
+          on <span class="accent tagline-rotate" id="tagline">
+            <span class="tagline-word active">autopilot.</span>
+            <span class="tagline-word">autopilot.</span>
+            <span class="tagline-word">autopilot.</span>
+          </span>
         </h1>
         <p class="lede">
           Point BULWARK at an authorized target. Walk away. Come back to a clean
@@ -1266,6 +1693,38 @@
         <div class="stat-num"><span data-count="0">0</span></div>
         <div class="stat-label">False positives</div>
         <div class="stat-sub">in delivered reports since v3</div>
+      </div>
+    </div>
+
+    <!-- Animated finding-trend chart -->
+    <div class="trend-chart reveal">
+      <div class="trend-header">
+        <div>
+          <div class="trend-title">Findings detected · last 30 days</div>
+          <div class="trend-sub">across all active engagements · live</div>
+        </div>
+        <div class="trend-legend">
+          <span class="dot-crit"></span>critical
+          <span class="dot-high"></span>high
+          <span class="dot-med"></span>medium
+          <span class="dot-low"></span>low
+        </div>
+      </div>
+      <svg class="trend-svg" viewBox="0 0 800 140" preserveAspectRatio="none" aria-hidden="true">
+        <!-- Grid -->
+        <g class="trend-grid" stroke="#000" stroke-opacity="0.06">
+          <line x1="0" y1="35" x2="800" y2="35"/>
+          <line x1="0" y1="70" x2="800" y2="70"/>
+          <line x1="0" y1="105" x2="800" y2="105"/>
+        </g>
+        <!-- Stacked area paths (drawn with draw-on animation) -->
+        <path class="trend-area low" d="M0,120 L26,118 L53,116 L80,114 L107,110 L133,108 L160,106 L187,104 L214,100 L240,98 L267,96 L294,92 L320,90 L347,88 L374,86 L400,84 L427,80 L454,78 L481,76 L507,74 L534,70 L560,68 L587,66 L614,62 L640,60 L667,58 L694,56 L720,52 L747,50 L774,48 L800,46 L800,140 L0,140 Z"/>
+        <path class="trend-area med" d="M0,110 L26,106 L53,104 L80,100 L107,96 L133,92 L160,90 L187,88 L214,84 L240,82 L267,78 L294,76 L320,72 L347,68 L374,66 L400,62 L427,58 L454,54 L481,50 L507,48 L534,44 L560,40 L587,38 L614,34 L640,32 L667,28 L694,24 L720,22 L747,20 L774,18 L800,16 L800,140 L0,140 Z"/>
+        <path class="trend-area high" d="M0,100 L26,98 L53,94 L80,90 L107,86 L133,82 L160,78 L187,74 L214,68 L240,66 L267,62 L294,58 L320,54 L347,50 L374,46 L400,42 L427,38 L454,34 L481,30 L507,28 L534,24 L560,20 L587,18 L614,14 L640,12 L667,10 L694,8 L720,8 L747,6 L774,6 L800,4 L800,140 L0,140 Z"/>
+        <path class="trend-area crit" d="M0,96 L26,94 L53,90 L80,86 L107,82 L133,78 L160,74 L187,68 L214,62 L240,58 L267,52 L294,48 L320,42 L347,38 L374,34 L400,28 L427,24 L454,20 L481,18 L507,16 L534,12 L560,10 L587,8 L614,6 L640,6 L667,4 L694,4 L720,4 L747,4 L774,2 L800,2 L800,140 L0,140 Z"/>
+      </svg>
+      <div class="trend-axis mono">
+        <span>day −30</span><span>−20</span><span>−10</span><span>today</span>
       </div>
     </div>
   </div>
@@ -1452,6 +1911,106 @@
 <span class="out">[14:11:47]</span> <span style="color:var(--sev-low)">✓</span> verified · evidence sealed · finding drafted
 <span class="out">[14:11:48]</span> audit-log entry appended</div>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="section-h reveal">How BULWARK runs.</h2>
+      <p class="section-sub reveal reveal-d-1">
+        Single binary, four primitives. The runner is a sandboxed process
+        on a hardened image; the audit log is append-only with hash-chained
+        entries; the report builder is offline and reproducible.
+      </p>
+    </div>
+
+    <div class="arch-schema reveal">
+      <svg viewBox="0 0 1100 320" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#0A0A0A"/>
+          </marker>
+          <marker id="arr-light" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#999"/>
+          </marker>
+        </defs>
+
+        <!-- Boxes -->
+        <g class="arch-node" transform="translate(40, 60)">
+          <rect width="200" height="80" rx="10" fill="#fff" stroke="#000" stroke-opacity="0.16"/>
+          <text x="16" y="26" font-family="ui-monospace" font-size="11" fill="#666" letter-spacing="0.06em">RUNNER</text>
+          <text x="16" y="48" font-family="Inter,sans-serif" font-size="15" font-weight="600" fill="#0A0A0A">Sandboxed agent</text>
+          <text x="16" y="66" font-family="ui-monospace" font-size="11" fill="#666">egress-pinned · rootless</text>
+        </g>
+
+        <g class="arch-node" transform="translate(310, 60)">
+          <rect width="200" height="80" rx="10" fill="#fff" stroke="#000" stroke-opacity="0.16"/>
+          <text x="16" y="26" font-family="ui-monospace" font-size="11" fill="#666" letter-spacing="0.06em">VAULT</text>
+          <text x="16" y="48" font-family="Inter,sans-serif" font-size="15" font-weight="600" fill="#0A0A0A">Encrypted storage</text>
+          <text x="16" y="66" font-family="ui-monospace" font-size="11" fill="#666">per-engagement keys</text>
+        </g>
+
+        <g class="arch-node arch-node-primary" transform="translate(580, 60)">
+          <rect width="200" height="80" rx="10" fill="#0A0A0A"/>
+          <text x="16" y="26" font-family="ui-monospace" font-size="11" fill="rgba(255,255,255,0.5)" letter-spacing="0.06em">AUDIT LOG</text>
+          <text x="16" y="48" font-family="Inter,sans-serif" font-size="15" font-weight="600" fill="#ffffff">Append-only</text>
+          <text x="16" y="66" font-family="ui-monospace" font-size="11" fill="rgba(255,255,255,0.5)">SHA-256 hash-chained</text>
+        </g>
+
+        <g class="arch-node" transform="translate(850, 60)">
+          <rect width="200" height="80" rx="10" fill="#fff" stroke="#000" stroke-opacity="0.16"/>
+          <text x="16" y="26" font-family="ui-monospace" font-size="11" fill="#666" letter-spacing="0.06em">REPORT</text>
+          <text x="16" y="48" font-family="Inter,sans-serif" font-size="15" font-weight="600" fill="#0A0A0A">Offline builder</text>
+          <text x="16" y="66" font-family="ui-monospace" font-size="11" fill="#666">md · json · pdf · signed</text>
+        </g>
+
+        <!-- Arrows between boxes -->
+        <line x1="240" y1="100" x2="310" y2="100" stroke="#999" stroke-width="1.5" marker-end="url(#arr-light)"/>
+        <text x="252" y="92" font-family="ui-monospace" font-size="10" fill="#666">artifacts</text>
+
+        <line x1="510" y1="100" x2="580" y2="100" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="518" y="92" font-family="ui-monospace" font-size="10" fill="#0A0A0A">events</text>
+
+        <line x1="780" y1="100" x2="850" y2="100" stroke="#999" stroke-width="1.5" marker-end="url(#arr-light)"/>
+        <text x="790" y="92" font-family="ui-monospace" font-size="10" fill="#666">findings</text>
+
+        <!-- Below row: targets -->
+        <g class="arch-target" transform="translate(40, 220)">
+          <rect width="200" height="60" rx="8" fill="#FAFAFA" stroke="#000" stroke-opacity="0.08" stroke-dasharray="3,3"/>
+          <text x="16" y="22" font-family="ui-monospace" font-size="11" fill="#666" letter-spacing="0.06em">TARGET</text>
+          <text x="16" y="42" font-family="Inter,sans-serif" font-size="13" fill="#0A0A0A">Authorized host</text>
+        </g>
+
+        <line x1="140" y1="220" x2="140" y2="160" stroke="#999" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arr-light)"/>
+        <text x="148" y="190" font-family="ui-monospace" font-size="10" fill="#666">scoped</text>
+
+        <!-- Below row: scope owner -->
+        <g class="arch-target" transform="translate(850, 220)">
+          <rect width="200" height="60" rx="8" fill="#FAFAFA" stroke="#000" stroke-opacity="0.08"/>
+          <text x="16" y="22" font-family="ui-monospace" font-size="11" fill="#666" letter-spacing="0.06em">SCOPE OWNER</text>
+          <text x="16" y="42" font-family="Inter,sans-serif" font-size="13" fill="#0A0A0A">You · RSSI / CISO</text>
+        </g>
+
+        <line x1="950" y1="220" x2="950" y2="160" stroke="#999" stroke-width="1.5" marker-end="url(#arr-light)"/>
+        <text x="958" y="190" font-family="ui-monospace" font-size="10" fill="#666">report</text>
+
+        <!-- Annotation: verify anywhere -->
+        <g transform="translate(310, 220)">
+          <rect width="200" height="60" rx="8" fill="#fff" stroke="#0071e3" stroke-opacity="0.2"/>
+          <text x="16" y="22" font-family="ui-monospace" font-size="11" fill="#0071e3" letter-spacing="0.06em">VERIFY</text>
+          <text x="16" y="42" font-family="Inter,sans-serif" font-size="13" fill="#0A0A0A">Replay audit log offline</text>
+        </g>
+
+        <line x1="680" y1="140" x2="510" y2="220" stroke="#0071e3" stroke-opacity="0.4" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-light)"/>
+        <text x="600" y="180" font-family="ui-monospace" font-size="10" fill="#0071e3">prove</text>
+      </svg>
+
+      <div class="arch-foot mono">
+        // Single binary · 4 primitives · auditable end-to-end · no third-party SaaS in the loop
       </div>
     </div>
   </div>
@@ -1683,6 +2242,71 @@ the user table with production (<span class="comment">verified via
             <div class="ci-sub">disclosure.getwark.com</div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT WE DON'T DO -->
+<section class="not-do">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="section-h reveal">What we don't do.</h2>
+      <p class="section-sub reveal reveal-d-1">
+        Clear scope is half the value of an autonomous agent. Below is the
+        honest list of what BULWARK explicitly does not attempt — and who
+        we hand off to when it's the right call.
+      </p>
+    </div>
+
+    <div class="not-do-grid reveal">
+      <div class="not-do-item">
+        <div class="not-do-num">—</div>
+        <div class="not-do-body">
+          <div class="not-do-title">Internal network pentests</div>
+          <div class="not-do-desc">We stay external. For internal assessments, we partner with two firms we'd trust with our own infra.</div>
+        </div>
+        <div class="not-do-tag mono">partnered</div>
+      </div>
+      <div class="not-do-item">
+        <div class="not-do-num">—</div>
+        <div class="not-do-body">
+          <div class="not-do-title">Social engineering / phishing</div>
+          <div class="not-do-desc">No pretext calls, no phishing kits, no vishing. These need a human operator and a legal frame we don't ship.</div>
+        </div>
+        <div class="not-do-tag mono">out of scope</div>
+      </div>
+      <div class="not-do-item">
+        <div class="not-do-num">—</div>
+        <div class="not-do-body">
+          <div class="not-do-title">Physical / red team engagements</div>
+          <div class="not-do-desc">No on-site visits, no lockpicking, no badge cloning. Different craft, different vendor.</div>
+        </div>
+        <div class="not-do-tag mono">out of scope</div>
+      </div>
+      <div class="not-do-item">
+        <div class="not-do-num">—</div>
+        <div class="not-do-body">
+          <div class="not-do-title">Mobile app reverse engineering</div>
+          <div class="not-do-desc">iOS / Android binaries need a different harness and a different report shape. Ask us for a partner firm.</div>
+        </div>
+        <div class="not-do-tag mono">partnered</div>
+      </div>
+      <div class="not-do-item">
+        <div class="not-do-num">—</div>
+        <div class="not-do-body">
+          <div class="not-do-title">Compliance audits (SOC2, ISO, PCI)</div>
+          <div class="not-do-desc">We produce evidence; certified auditors produce attestations. Different document, different liability.</div>
+        </div>
+        <div class="not-do-tag mono">out of scope</div>
+      </div>
+      <div class="not-do-item">
+        <div class="not-do-num">—</div>
+        <div class="not-do-body">
+          <div class="not-do-title">Destructive payloads without 2-of-2</div>
+          <div class="not-do-desc">No data-wiping, no ransomware simulations, no destructive ransomware tests — ever, without explicit dual approval.</div>
+        </div>
+        <div class="not-do-tag mono">gated</div>
       </div>
     </div>
   </div>
@@ -1946,9 +2570,113 @@ the user table with production (<span class="comment">verified via
   </div>
 </footer>
 
+</main>
+
 <script>
-  // Mark JS ready
+  // Mark JS ready + page loaded
   document.documentElement.classList.add('js-ready');
+  requestAnimationFrame(() => {
+    document.documentElement.classList.add('loaded');
+  });
+
+  // === Theme toggle (light / dark) ===
+  const themeBtn = document.getElementById('theme-toggle');
+  const themeIcon = themeBtn.querySelector('.theme-toggle-icon');
+  const storedTheme = localStorage.getItem('bulwark-theme');
+  if (storedTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    themeIcon.dataset.mode = 'dark';
+  }
+  themeBtn.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      themeIcon.dataset.mode = 'light';
+      localStorage.setItem('bulwark-theme', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      themeIcon.dataset.mode = 'dark';
+      localStorage.setItem('bulwark-theme', 'dark');
+    }
+  });
+
+  // === Cursor follower (desktop only via media query) ===
+  const follower = document.getElementById('cursor-follower');
+  const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (supportsHover) {
+    let mouseX = 0, mouseY = 0;
+    let followerX = 0, followerY = 0;
+    let followerTicking = false;
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      if (!followerTicking) {
+        requestAnimationFrame(() => {
+          followerX += (mouseX - followerX) * 0.18;
+          followerY += (mouseY - followerY) * 0.18;
+          follower.style.left = followerX + 'px';
+          follower.style.top = followerY + 'px';
+          followerTicking = false;
+        });
+        followerTicking = true;
+      }
+    }, { passive: true });
+    // Hover state on interactive elements
+    document.querySelectorAll('a, button, .cap-row, .not-do-item, .tier, .compliance-item, .how-step, .changelog-row, .faq-item').forEach(el => {
+      el.addEventListener('mouseenter', () => follower.classList.add('hover'));
+      el.addEventListener('mouseleave', () => follower.classList.remove('hover'));
+    });
+  }
+
+  // === Tagline rotative ===
+  const taglineWords = document.querySelectorAll('.tagline-word');
+  const taglineRotations = ['autopilot.', 'without staffing.', 'continuously.'];
+  let taglineIdx = 0;
+  // Set actual content
+  taglineWords.forEach((el, i) => {
+    el.textContent = taglineRotations[i] || taglineRotations[0];
+  });
+  setInterval(() => {
+    taglineWords.forEach(w => w.classList.remove('active'));
+    taglineIdx = (taglineIdx + 1) % taglineRotations.length;
+    // Position the next word in place
+    const next = document.getElementById('tagline');
+    const oldActive = document.querySelector('.tagline-word.active');
+    if (oldActive) {
+      oldActive.style.position = 'absolute';
+      oldActive.style.opacity = '0';
+      oldActive.style.transform = 'translateY(-20%)';
+    }
+    // Create or reuse the word element
+    let activeEl = next.querySelector('.tagline-word.active');
+    if (!activeEl) {
+      activeEl = document.createElement('span');
+      activeEl.className = 'tagline-word';
+      next.appendChild(activeEl);
+    }
+    activeEl.textContent = taglineRotations[taglineIdx];
+    activeEl.style.position = 'relative';
+    requestAnimationFrame(() => {
+      activeEl.classList.add('active');
+      activeEl.style.opacity = '1';
+      activeEl.style.transform = 'translateY(0)';
+    });
+    // Cleanup old
+    setTimeout(() => {
+      next.querySelectorAll('.tagline-word').forEach(w => {
+        if (w !== activeEl) w.remove();
+      });
+    }, 600);
+  }, 2800);
+
+  // === Toast (delayed show on load) ===
+  const toast = document.getElementById('toast');
+  setTimeout(() => toast.classList.add('show'), 4200);
+  toast.addEventListener('click', () => {
+    toast.classList.remove('show');
+  });
+  // Auto-dismiss after 8s
+  setTimeout(() => toast.classList.remove('show'), 12000);
 
   // === Reveal on scroll ===
   const reveals = document.querySelectorAll('.reveal');
