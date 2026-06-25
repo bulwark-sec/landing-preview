@@ -1466,6 +1466,199 @@
     a, button, input, select, textarea, [role="button"] { cursor: none; }
   }
 
+  /* === V6 — Cursor trail === */
+  .cursor-trail {
+    position: fixed;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--color-fg);
+    pointer-events: none;
+    z-index: 149;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+  }
+  .cursor-trail.active { opacity: 0.4; }
+
+  /* === V6 — Magnetic CTA (refined) === */
+  .magnetic { transition: transform 200ms var(--ease-smooth); }
+  .magnetic::before {
+    content: ""; position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, var(--color-fg), transparent);
+    opacity: 0;
+    transition: opacity 200ms var(--ease-smooth);
+    z-index: -1;
+  }
+  .magnetic:hover::before { opacity: 0.08; }
+
+  /* === V6 — Ripple on click === */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--color-on-accent);
+    pointer-events: none;
+    transform: scale(0);
+    opacity: 0.6;
+    animation: ripple-expand 600ms var(--ease-smooth) forwards;
+  }
+  @keyframes ripple-expand {
+    to { transform: scale(4); opacity: 0; }
+  }
+
+  /* === V6 — Marquee for trust strip === */
+  .marquee {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  }
+  .marquee-track {
+    display: flex; gap: 48px;
+    animation: marquee-scroll 35s linear infinite;
+    width: max-content;
+  }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+  .marquee-item {
+    flex-shrink: 0;
+    font-family: 'Geist Mono', monospace;
+    font-size: 13px;
+    color: var(--color-muted);
+    letter-spacing: 0.02em;
+    padding: 0 8px;
+    display: inline-flex; align-items: center; gap: 12px;
+    white-space: nowrap;
+  }
+  .marquee-item::before {
+    content: ""; display: inline-block;
+    width: 4px; height: 4px;
+    background: var(--color-muted-2);
+    border-radius: 50%;
+  }
+  .marquee-item:first-child::before { display: none; }
+  @keyframes marquee-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* === V6 — Animated underline on nav links === */
+  .nav-links a {
+    position: relative;
+    padding: 4px 0;
+  }
+  .nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 100%; bottom: 0;
+    height: 1px;
+    background: var(--color-fg);
+    transition: right 250ms var(--ease-spring);
+  }
+  .nav-links a:hover::after { right: 0; }
+
+  /* === V6 — Skeleton loader for hero image === */
+  .hero-shot-wrap.loading .hero-shot {
+    background: linear-gradient(90deg, var(--color-panel) 0%, var(--color-panel-2) 50%, var(--color-panel) 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+    min-height: 380px;
+  }
+  .hero-shot-wrap.loading .hero-shot img { opacity: 0; }
+  @keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* === V6 — Number flip animation === */
+  .flip-num {
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    height: 1em;
+    vertical-align: baseline;
+  }
+  .flip-num-track {
+    display: flex; flex-direction: column;
+    transition: transform 800ms var(--ease-spring);
+  }
+  .flip-num-digit {
+    height: 1em;
+    line-height: 1;
+  }
+
+  /* === V6 — Scroll-driven parallax (for stats chart, hero) === */
+  .parallax-slow { will-change: transform; }
+  .parallax-medium { will-change: transform; }
+  .parallax-fast { will-change: transform; }
+
+  /* === V6 — Section reveal stagger (more sophisticated) === */
+  html.js-ready .reveal-stagger > * {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 600ms var(--ease-smooth), transform 600ms var(--ease-smooth);
+  }
+  html.js-ready .reveal-stagger.visible > * {
+    opacity: 1; transform: translateY(0);
+  }
+  html.js-ready .reveal-stagger.visible > *:nth-child(1) { transition-delay: 0ms; }
+  html.js-ready .reveal-stagger.visible > *:nth-child(2) { transition-delay: 80ms; }
+  html.js-ready .reveal-stagger.visible > *:nth-child(3) { transition-delay: 160ms; }
+  html.js-ready .reveal-stagger.visible > *:nth-child(4) { transition-delay: 240ms; }
+  html.js-ready .reveal-stagger.visible > *:nth-child(5) { transition-delay: 320ms; }
+  html.js-ready .reveal-stagger.visible > *:nth-child(6) { transition-delay: 400ms; }
+  html.js-ready .reveal-stagger.visible > *:nth-child(7) { transition-delay: 480ms; }
+  html.js-ready .reveal-stagger.visible > *:nth-child(8) { transition-delay: 560ms; }
+  html.js-ready .reveal-stagger.visible > *:nth-child(9) { transition-delay: 640ms; }
+  html.js-ready .reveal-stagger.visible > *:nth-child(10) { transition-delay: 720ms; }
+
+  /* === V6 — Smooth section transitions === */
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+    position: relative;
+  }
+  .section-divider::before {
+    content: "";
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--color-fg);
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 400ms var(--ease-spring);
+  }
+  .section-divider.in-view::before { transform: translate(-50%, -50%) scale(1); }
+
+  /* === V6 — Hover image reveal on cap-row === */
+  .cap-row {
+    position: relative;
+  }
+  .cap-row .cap-preview {
+    position: absolute;
+    right: 24px; top: 50%;
+    transform: translateY(-50%) scale(0.95);
+    width: 220px; height: 130px;
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 250ms var(--ease-smooth), transform 350ms var(--ease-spring);
+    padding: 12px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--color-muted);
+    line-height: 1.5;
+    overflow: hidden;
+    z-index: 5;
+  }
+  .cap-row:hover .cap-preview {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  @media (max-width: 960px) { .cap-row .cap-preview { display: none; } }
+
   /* === Theme toggle === */
   .theme-toggle {
     width: 32px; height: 32px;
@@ -1891,7 +2084,7 @@
         </div>
       </div>
 
-      <div class="hero-shot-wrap reveal reveal-d-2">
+      <div class="hero-shot-wrap reveal reveal-d-2" data-parallax="-0.05">
         <div class="live-counter">
           <div class="lc-row"><span class="lc-key"><span class="lc-pulse"></span>ENGAGEMENT</span><span class="lc-val" id="lc-target">acme-prod-04</span></div>
           <div class="lc-row"><span class="lc-key">ELAPSED</span><span class="lc-val" id="lc-elapsed">03:42:18</span></div>
@@ -1982,17 +2175,34 @@
   </div>
 </section>
 
-<!-- TRUST STRIP (honest — no fake logos) -->
+<!-- TRUST STRIP (marquee animation, honest — no fake logos) -->
 <div class="trust">
-  <div class="wrap trust-row">
-    <span class="trust-label">// Tested across</span>
-    <div class="trust-types">
-      <span>SaaS B2B apps</span>
-      <span>Fintech APIs</span>
-      <span>Healthcare portals</span>
-      <span>Industrial control systems</span>
-      <span>Government services</span>
-      <span>Open-source infra</span>
+  <div class="wrap">
+    <div class="trust-label" style="margin-bottom:16px;">// Tested across</div>
+    <div class="marquee">
+      <div class="marquee-track">
+        <span class="marquee-item">SaaS B2B apps</span>
+        <span class="marquee-item">Fintech APIs</span>
+        <span class="marquee-item">Healthcare portals</span>
+        <span class="marquee-item">Industrial control systems</span>
+        <span class="marquee-item">Government services</span>
+        <span class="marquee-item">Open-source infra</span>
+        <span class="marquee-item">Banking platforms</span>
+        <span class="marquee-item">E-commerce infra</span>
+        <span class="marquee-item">IoT deployments</span>
+        <span class="marquee-item">Telco backends</span>
+        <!-- Duplicated for seamless loop -->
+        <span class="marquee-item">SaaS B2B apps</span>
+        <span class="marquee-item">Fintech APIs</span>
+        <span class="marquee-item">Healthcare portals</span>
+        <span class="marquee-item">Industrial control systems</span>
+        <span class="marquee-item">Government services</span>
+        <span class="marquee-item">Open-source infra</span>
+        <span class="marquee-item">Banking platforms</span>
+        <span class="marquee-item">E-commerce infra</span>
+        <span class="marquee-item">IoT deployments</span>
+        <span class="marquee-item">Telco backends</span>
+      </div>
     </div>
   </div>
 </div>
@@ -2022,6 +2232,12 @@
           <strong>avg 0.4s/host</strong>
           <span>→</span>
         </div>
+        <div class="cap-preview">
+          <div style="color:var(--sev-low);">✓ scope validated</div>
+          <div>in-scope: 47 hosts</div>
+          <div>out-of-scope: 3 skipped</div>
+          <div style="margin-top:8px;color:var(--color-muted-2);">sha256:a3f9c1d...</div>
+        </div>
       </div>
       <div class="cap-row reveal reveal-d-1">
         <div class="cap-num">02</div>
@@ -2034,6 +2250,12 @@
         <div class="cap-meta">
           <strong>47 sources · 12 stdlib</strong>
           <span>→</span>
+        </div>
+        <div class="cap-preview">
+          <div style="color:var(--sev-info);">[recon] initialized</div>
+          <div>cert-transparency · ASN map</div>
+          <div>12 services discovered</div>
+          <div style="margin-top:8px;color:var(--color-muted-2);">in 03:48</div>
         </div>
       </div>
       <div class="cap-row reveal reveal-d-2">
@@ -2048,6 +2270,12 @@
           <strong>~38k templates · daily refresh</strong>
           <span>→</span>
         </div>
+        <div class="cap-preview">
+          <div style="color:var(--sev-info);">[match] fingerprinting</div>
+          <div>apache-solr 8.11.2 detected</div>
+          <div>14,302 templates loaded</div>
+          <div style="margin-top:8px;color:var(--sev-high);">2 exploit-reachable</div>
+        </div>
       </div>
       <div class="cap-row reveal reveal-d-3">
         <div class="cap-num">04</div>
@@ -2060,6 +2288,12 @@
         <div class="cap-meta">
           <strong>2-of-2 approval for destructive</strong>
           <span>→</span>
+        </div>
+        <div class="cap-preview">
+          <div style="color:var(--sev-high);">[!] CVE-2025-24813</div>
+          <div>apached solr · RCE reachable</div>
+          <div style="color:var(--sev-low);">✓ verified · evidence sealed</div>
+          <div style="margin-top:8px;color:var(--color-muted-2);">sha256:9f2a8b3...</div>
         </div>
       </div>
       <div class="cap-row reveal reveal-d-4">
@@ -2074,6 +2308,12 @@
           <strong>SHA-256 + chain-of-custody</strong>
           <span>→</span>
         </div>
+        <div class="cap-preview">
+          <div style="color:var(--sev-info);">[verify] capturing</div>
+          <div>request/response transcript</div>
+          <div>artifact sha256:9f2a...c4b1</div>
+          <div style="margin-top:8px;color:var(--color-muted-2);">+ NTP timestamp</div>
+        </div>
       </div>
       <div class="cap-row reveal reveal-d-5">
         <div class="cap-num">06</div>
@@ -2086,6 +2326,12 @@
         <div class="cap-meta">
           <strong>md / json / pdf — 3 formats</strong>
           <span>→</span>
+        </div>
+        <div class="cap-preview">
+          <div style="color:var(--sev-low);">✓ report shipped</div>
+          <div>md · json · pdf · signed</div>
+          <div>3 findings · 1 critical</div>
+          <div style="margin-top:8px;color:var(--color-muted-2);">cosign verified</div>
         </div>
       </div>
     </div>
@@ -3093,6 +3339,118 @@ the user table with production (<span class="comment">verified via
       const headerH = document.querySelector('header').offsetHeight;
       const top = target.getBoundingClientRect().top + window.scrollY - headerH - 8;
       window.scrollTo({ top, behavior: 'smooth' });
+    });
+  });
+
+  // === V6 — Cursor trail (3 dots following with lag) ===
+  if (supportsHover) {
+    const trailCount = 3;
+    const trails = [];
+    for (let i = 0; i < trailCount; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'cursor-trail';
+      dot.style.opacity = '0';
+      document.body.appendChild(dot);
+      trails.push({ el: dot, x: 0, y: 0, target: 0 });
+    }
+    let trailLast = 0;
+    document.addEventListener('mousemove', (e) => {
+      trails.forEach(t => { t.target = (t.target + 1) % trails.length; });
+      // Each trail catches up with a different lag factor
+      const lags = [0.08, 0.06, 0.04];
+      trails.forEach((t, i) => {
+        if (i === 0) { t.x = e.clientX; t.y = e.clientY; }
+        else {
+          t.x += (trails[i-1].x - t.x) * lags[i];
+          t.y += (trails[i-1].y - t.y) * lags[i];
+        }
+        t.el.style.left = t.x + 'px';
+        t.el.style.top = t.y + 'px';
+        t.el.style.opacity = (0.3 - i * 0.08) + '';
+      });
+    });
+    document.addEventListener('mouseleave', () => {
+      trails.forEach(t => t.el.style.opacity = '0');
+    });
+  }
+
+  // === V6 — Scroll-driven parallax (subtle, hero + stats chart) ===
+  const parallaxEls = document.querySelectorAll('[data-parallax]');
+  if (parallaxEls.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let parallaxScrollY = 0;
+    let parallaxTicking = false;
+    window.addEventListener('scroll', () => {
+      parallaxScrollY = window.scrollY;
+      if (!parallaxTicking) {
+        requestAnimationFrame(() => {
+          parallaxEls.forEach(el => {
+            const speed = parseFloat(el.dataset.parallax) || 0;
+            const rect = el.getBoundingClientRect();
+            const offset = (window.innerHeight - rect.top) * speed;
+            el.style.transform = `translateY(${offset}px)`;
+          });
+          parallaxTicking = false;
+        });
+        parallaxTicking = true;
+      }
+    }, { passive: true });
+  }
+
+  // === V6 — Reveal stagger observer (multi-element sections) ===
+  document.querySelectorAll('.reveal-stagger').forEach(container => {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    io.observe(container);
+  });
+
+  // === V6 — Section divider pulse on enter ===
+  document.querySelectorAll('.section-divider').forEach(d => {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in-view');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    io.observe(d);
+  });
+
+  // === V6 — Skeleton loader for hero image (until loaded) ===
+  const heroShotWrap = document.querySelector('.hero-shot-wrap');
+  if (heroShotWrap) {
+    const img = heroShotWrap.querySelector('img');
+    if (img) {
+      if (!img.complete) {
+        heroShotWrap.classList.add('loading');
+        img.addEventListener('load', () => heroShotWrap.classList.remove('loading'), { once: true });
+        img.addEventListener('error', () => heroShotWrap.classList.remove('loading'), { once: true });
+      }
+    }
+  }
+
+  // === V6 — Click ripple effect on buttons ===
+  document.querySelectorAll('.btn, .tier-cta').forEach(btn => {
+    btn.style.position = 'relative';
+    btn.style.overflow = 'hidden';
+    btn.addEventListener('click', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple';
+      const size = Math.max(rect.width, rect.height);
+      ripple.style.width = size + 'px';
+      ripple.style.height = size + 'px';
+      ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+      ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+      ripple.style.background = getComputedStyle(btn).backgroundColor === 'rgba(0, 0, 0, 0)' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.4)';
+      btn.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 700);
     });
   });
 </script>
