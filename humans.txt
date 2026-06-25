@@ -1,0 +1,17 @@
+/* TEAM */
+Author: Bulwark SAS
+Site: https://getwark.com
+Twitter: @bulwark_sec
+GitHub: https://github.com/bulwark-sec
+Location: Paris, FR · San Francisco, US
+Built with: Geist, Geist Mono, semantic HTML, vanilla CSS, vanilla JS, no frameworks.
+
+/* THANKS */
+Open source contributors — nuclei, NVD, GHSA, OWASP, CERT, projectdiscovery.
+Every offensive researcher who reported findings and let us learn from them.
+
+/* SITE */
+Last update: 2026/06/25
+Standards: HTML5, CSS3, ES2022
+Components: BULWARK webapp
+Software: bulwark v5.32, build a3f9c1d
