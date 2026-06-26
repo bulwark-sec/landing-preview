@@ -77,7 +77,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <!-- Preload hero image -->
-<link rel="preload" as="image" href="hero-product.png" fetchpriority="high">
+<!-- hero-product.png preload removed in V10 (replaced by 3D canvas) -->
 
 <!-- Favicon (data URI, no extra request) -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230A0A0A'/><text x='16' y='22' font-family='sans-serif' font-weight='900' font-size='20' fill='%23ffffff' text-anchor='middle'>B</text></svg>">
@@ -2376,6 +2376,83 @@
     * { cursor: auto !important; }
   }
 </style>
+
+<!-- 3D engine: Three.js r170 via importmap (subresource-loaded for performance) -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+
+<!-- 3D styles: canvas position + perf hints -->
+<style>
+  /* === 3D HERO CANVAS === */
+  .hero-shot {
+    position: relative;
+    aspect-ratio: 4/3;
+    background: linear-gradient(135deg, #FAFAFA 0%, #F1F0EE 100%);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+  .hero-3d-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: grab;
+  }
+  .hero-3d-canvas:active { cursor: grabbing; }
+  .hero-3d-canvas canvas { display: block; outline: none; }
+  
+  /* Disable 3D on small screens (perf + UX) */
+  @media (max-width: 768px) {
+    .hero-3d-canvas { display: none; }
+    .hero-shot { background: linear-gradient(135deg, #F1F0EE 0%, #FAFAFA 50%, #FAFAFA 100%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-3d-canvas { display: none; }
+  }
+  
+  /* === 3D CAPSULES (what we don't do section) === */
+  .capsule-3d-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  
+  /* === BACKGROUND PARTICLES (full page) === */
+  .bg-particles-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+  
+  /* Bring content above particles */
+  header, main, section, footer { position: relative; z-index: 1; }
+  
+  /* === LOADING SHIM for 3D === */
+  .hero-shot[data-3d-loading="true"]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #FAFAFA 0%, #F1F0EE 100%);
+    z-index: 1;
+  }
+  .hero-shot[data-3d-ready="true"]::before { display: none; }
+</style>
+
 </head>
 <body>
 
@@ -2474,11 +2551,11 @@
           <div class="lc-row"><span class="lc-key">FINDINGS</span><span class="lc-val" id="lc-findings">12</span></div>
           <div class="lc-row"><span class="lc-key">PHASE</span><span class="lc-val" id="lc-phase">04 / 06</span></div>
         </div>
-        <div class="hero-shot">
-          <img src="hero-product.png" alt="BULWARK Configure engagement screen" />
+        <div class="hero-shot" id="hero3d" data-3d-loading="true">
+          <div class="hero-3d-canvas" id="hero3d-canvas"></div>
           <div class="shot-caption">
-            <span class="badge">Configure engagement · scope & auth</span>
-            <span class="mono">bulwark · configure</span>
+            <span class="badge">Live · 3D scene</span>
+            <span class="mono">bulwark · engagement topology</span>
           </div>
         </div>
       </div>
@@ -4365,6 +4442,300 @@ Run 'bulwark &lt;command&gt; --help' for details.</pre>
       }, 600);
     });
   }
+</script>
+
+
+<!-- ============================================================ -->
+<!-- ============== THREE.JS 3D ENGINE (module) ================== -->
+<!-- ============================================================ -->
+<script type="module">
+import * as THREE from 'three';
+
+// ============================================================
+// SECTION 1: HERO 3D SCENE (engagement topology)
+// ============================================================
+const heroContainer = document.getElementById('hero3d-canvas');
+const heroShot = document.getElementById('hero3d');
+
+if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  // Scene setup
+  const scene = new THREE.Scene();
+  scene.background = null; // transparent canvas
+  
+  const camera = new THREE.PerspectiveCamera(45, heroContainer.clientWidth / heroContainer.clientHeight, 0.1, 100);
+  camera.position.set(0, 0, 8);
+  
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+  renderer.setSize(heroContainer.clientWidth, heroContainer.clientHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  heroContainer.appendChild(renderer.domElement);
+  
+  // === LIGHTING ===
+  // Soft ambient
+  const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambient);
+  
+  // Key light (top-front, warm)
+  const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
+  keyLight.position.set(3, 5, 4);
+  scene.add(keyLight);
+  
+  // Fill light (left, cool)
+  const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
+  fillLight.position.set(-5, 0, 2);
+  scene.add(fillLight);
+  
+  // Rim light (back)
+  const rimLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  rimLight.position.set(0, 2, -5);
+  scene.add(rimLight);
+  
+  // === MAIN OBJECT: geometric engagement topology ===
+  // Build a complex shape: nested icosahedron + wireframe sphere + orbiting nodes
+  // This represents BULWARK's hierarchical engagement topology
+  
+  // 1. Inner icosahedron (solid, slightly translucent)
+  const innerGeo = new THREE.IcosahedronGeometry(1.0, 0);
+  const innerMat = new THREE.MeshPhysicalMaterial({
+    color: 0x0A0A0A,
+    metalness: 0.4,
+    roughness: 0.25,
+    clearcoat: 0.8,
+    clearcoatRoughness: 0.1,
+    flatShading: true
+  });
+  const inner = new THREE.Mesh(innerGeo, innerMat);
+  scene.add(inner);
+  
+  // 2. Outer wireframe icosahedron
+  const outerGeo = new THREE.IcosahedronGeometry(1.5, 1);
+  const outerMat = new THREE.MeshBasicMaterial({
+    color: 0x0A0A0A,
+    wireframe: true,
+    transparent: true,
+    opacity: 0.18
+  });
+  const outer = new THREE.Mesh(outerGeo, outerMat);
+  scene.add(outer);
+  
+  // 3. Halo ring (subtle, perpendicular to camera)
+  const ringGeo = new THREE.TorusGeometry(2.0, 0.008, 16, 100);
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0x0A0A0A, transparent: true, opacity: 0.4 });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.rotation.x = Math.PI / 2;
+  scene.add(ring);
+  
+  // 4. Second ring (perpendicular)
+  const ring2 = ring.clone();
+  ring2.rotation.x = Math.PI / 3;
+  ring2.rotation.y = Math.PI / 6;
+  ring2.material = ringMat.clone();
+  ring2.material.opacity = 0.2;
+  scene.add(ring2);
+  
+  // 5. Orbiting nodes (representing engagement touchpoints)
+  const nodeCount = 12;
+  const nodes = [];
+  const nodeGroup = new THREE.Group();
+  for (let i = 0; i < nodeCount; i++) {
+    const nodeGeo = new THREE.SphereGeometry(0.045, 12, 12);
+    const nodeMat = new THREE.MeshBasicMaterial({ color: 0x0A0A0A });
+    const node = new THREE.Mesh(nodeGeo, nodeMat);
+    node.userData = {
+      angle: (i / nodeCount) * Math.PI * 2,
+      radius: 2.0,
+      speed: 0.15 + Math.random() * 0.1,
+      yOffset: (Math.random() - 0.5) * 0.6
+    };
+    nodes.push(node);
+    nodeGroup.add(node);
+  }
+  scene.add(nodeGroup);
+  
+  // 6. Connection lines from center to each node
+  const lineMat = new THREE.LineBasicMaterial({ color: 0x0A0A0A, transparent: true, opacity: 0.15 });
+  const lineGeo = new THREE.BufferGeometry();
+  const linePositions = new Float32Array(nodeCount * 2 * 3);
+  lineGeo.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+  const lines = new THREE.LineSegments(lineGeo, lineMat);
+  scene.add(lines);
+  
+  // === INTERACTION: mouse drag to rotate ===
+  let isDragging = false;
+  let prevMouse = { x: 0, y: 0 };
+  let userRotation = { x: 0, y: 0 };
+  let autoRotation = { x: 0, y: 0 };
+  
+  heroContainer.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    prevMouse = { x: e.clientX, y: e.clientY };
+  });
+  window.addEventListener('mouseup', () => { isDragging = false; });
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - prevMouse.x;
+    const dy = e.clientY - prevMouse.y;
+    userRotation.y += dx * 0.005;
+    userRotation.x += dy * 0.005;
+    userRotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, userRotation.x));
+    prevMouse = { x: e.clientX, y: e.clientY };
+  });
+  
+  // === ANIMATION LOOP ===
+  let heroScroll = 0;
+  window.addEventListener('scroll', () => {
+    heroScroll = window.scrollY;
+  }, { passive: true });
+  
+  const clock = new THREE.Clock();
+  function animateHero() {
+    const t = clock.getElapsedTime();
+    const delta = clock.getDelta();
+    
+    // Auto-rotate (slow, editorial)
+    autoRotation.y += delta * 0.15;
+    
+    // Apply rotation to group
+    inner.rotation.y = autoRotation.y + userRotation.y;
+    inner.rotation.x = userRotation.x;
+    outer.rotation.copy(inner.rotation);
+    ring.rotation.z = -autoRotation.y * 0.5;
+    ring2.rotation.z = autoRotation.y * 0.3;
+    nodeGroup.rotation.copy(inner.rotation);
+    
+    // Pulse opacity on outer wireframe
+    outer.material.opacity = 0.15 + Math.sin(t * 1.5) * 0.05;
+    
+    // Update node positions
+    const linePos = lines.geometry.attributes.position.array;
+    nodes.forEach((node, i) => {
+      const ud = node.userData;
+      ud.angle += ud.speed * delta;
+      const x = Math.cos(ud.angle) * ud.radius;
+      const z = Math.sin(ud.angle) * ud.radius;
+      const y = ud.yOffset + Math.sin(t * 0.8 + i) * 0.15;
+      node.position.set(x, y, z);
+      
+      // Line from origin to node
+      linePos[i * 6 + 0] = 0;
+      linePos[i * 6 + 1] = 0;
+      linePos[i * 6 + 2] = 0;
+      linePos[i * 6 + 3] = x;
+      linePos[i * 6 + 4] = y;
+      linePos[i * 6 + 5] = z;
+    });
+    lines.geometry.attributes.position.needsUpdate = true;
+    
+    // Scroll-based camera dolly (subtle)
+    camera.position.z = 8 + heroScroll * 0.0015;
+    camera.lookAt(0, 0, 0);
+    
+    renderer.render(scene, camera);
+    requestAnimationFrame(animateHero);
+  }
+  animateHero();
+  heroShot.dataset['3dReady'] = 'true';
+  
+  // Resize
+  const ro = new ResizeObserver(() => {
+    const w = heroContainer.clientWidth;
+    const h = heroContainer.clientHeight;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  });
+  ro.observe(heroContainer);
+}
+
+// ============================================================
+// SECTION 2: BACKGROUND PARTICLES (full page, monochrome)
+// ============================================================
+const bgContainer = document.createElement('div');
+bgContainer.className = 'bg-particles-canvas';
+bgContainer.id = 'bg-particles-canvas';
+document.body.appendChild(bgContainer);
+
+if (!window.matchMedia('(max-width: 768px)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const bgScene = new THREE.Scene();
+  const bgCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+  bgCamera.position.z = 5;
+  
+  const bgRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  bgRenderer.setSize(window.innerWidth, window.innerHeight);
+  bgRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  bgContainer.appendChild(bgRenderer.domElement);
+  
+  // 200 small particles drifting
+  const particleCount = 200;
+  const positions = new Float32Array(particleCount * 3);
+  const velocities = new Float32Array(particleCount * 3);
+  for (let i = 0; i < particleCount; i++) {
+    positions[i * 3 + 0] = (Math.random() - 0.5) * 20;
+    positions[i * 3 + 1] = (Math.random() - 0.5) * 12;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+    velocities[i * 3 + 0] = (Math.random() - 0.5) * 0.0015;
+    velocities[i * 3 + 1] = (Math.random() - 0.5) * 0.0015 + 0.0003; // slight upward bias
+    velocities[i * 3 + 2] = 0;
+  }
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const pMat = new THREE.PointsMaterial({
+    color: 0x0A0A0A,
+    size: 0.025,
+    transparent: true,
+    opacity: 0.35,
+    sizeAttenuation: true
+  });
+  const particles = new THREE.Points(pGeo, pMat);
+  bgScene.add(particles);
+  
+  // Mouse-reactive — particles near cursor drift away (subtle)
+  let mouseX = 0, mouseY = 0;
+  window.addEventListener('mousemove', (e) => {
+    mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+    mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+  });
+  
+  function animateBg() {
+    const pos = particles.geometry.attributes.position.array;
+    for (let i = 0; i < particleCount; i++) {
+      pos[i * 3 + 0] += velocities[i * 3 + 0];
+      pos[i * 3 + 1] += velocities[i * 3 + 1];
+      
+      // Mouse repel (very subtle, falloff)
+      const px = pos[i * 3 + 0];
+      const py = pos[i * 3 + 1];
+      const worldMouseX = mouseX * 10;
+      const worldMouseY = mouseY * 6;
+      const dx = px - worldMouseX;
+      const dy = py - worldMouseY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 2.5) {
+        const force = (2.5 - dist) * 0.002;
+        pos[i * 3 + 0] += (dx / dist) * force;
+        pos[i * 3 + 1] += (dy / dist) * force;
+      }
+      
+      // Wrap around
+      if (pos[i * 3 + 1] > 6) pos[i * 3 + 1] = -6;
+      if (pos[i * 3 + 0] > 10) pos[i * 3 + 0] = -10;
+      if (pos[i * 3 + 0] < -10) pos[i * 3 + 0] = 10;
+    }
+    particles.geometry.attributes.position.needsUpdate = true;
+    bgRenderer.render(bgScene, bgCamera);
+    requestAnimationFrame(animateBg);
+  }
+  animateBg();
+  
+  window.addEventListener('resize', () => {
+    bgCamera.aspect = window.innerWidth / window.innerHeight;
+    bgCamera.updateProjectionMatrix();
+    bgRenderer.setSize(window.innerWidth, window.innerHeight);
+  });
+}
+
+// === Console sigil (anti-AI detection, small detail) ===
+console.log('%cBULWARK · 3D engine online', 'font-family: monospace; font-size: 11px; color: #0A0A0A; padding: 4px 8px; background: #FAFAFA; border: 1px solid #0A0A0A;');
 </script>
 
 </body>
