@@ -1473,30 +1473,7 @@
   html.loaded .page-loader { opacity: 0; }
 
   /* === Cursor follower (desktop only) === */
-  .cursor-follower {
-    position: fixed;
-    width: 20px; height: 20px;
-    border: 1.5px solid var(--color-fg);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 150;
-    transform: translate(-50%, -50%);
-    transition: width 200ms var(--ease-spring), height 200ms var(--ease-spring),
-                opacity 150ms var(--ease-smooth), background 150ms var(--ease-smooth);
-    opacity: 0;
-    mix-blend-mode: difference;
-    display: none;
-  }
-  .cursor-follower.visible { opacity: 0.7; }
-  .cursor-follower.hover {
-    width: 36px; height: 36px;
-    opacity: 1;
-    background: rgba(255, 255, 255, 0.12);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .cursor-follower { display: block; }
-    /* Only hide default cursor on a/button, NOT globally — keep system cursor as fallback */
-    a, button, [role="button"], label, summary, .tab-item, .faq-item { cursor: pointer; }
+  
   }
 
   /* === V6 — Cursor trail REMOVED in V9 (was too noisy) === */
@@ -2483,9 +2460,6 @@
 <body>
 
 <a href="#main" class="skip-link">Skip to main content</a>
-
-<!-- Cursor follower (desktop only) -->
-<div class="cursor-follower" id="cursor-follower" aria-hidden="true"></div>
 
 <!-- Page-load fade overlay -->
 <div class="page-loader" id="page-loader" aria-hidden="true"></div>
@@ -3799,93 +3773,6 @@ Run 'bulwark &lt;command&gt; --help' for details.</pre>
     }
   });
 
-  // === V9 — Cursor follower (simplified, no trail, hardware-accelerated) ===
-  // Toggle visibility class on movement, only on desktop with hover-capable input
-  const follower = document.getElementById('cursor-follower');
-  const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  if (supportsHover) {
-    let mouseX = 0, mouseY = 0;
-    let followerX = 0, followerY = 0;
-    let followerVisible = false;
-    let followerTicking = false;
-    let lastMoveTime = 0;
-
-    document.addEventListener('mousemove', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      const now = performance.now();
-      lastMoveTime = now;
-      if (!followerVisible) {
-        followerVisible = true;
-        follower.classList.add('visible');
-      }
-      if (!followerTicking) {
-        requestAnimationFrame(() => {
-          // Higher lag = smoother but more delayed; 0.22 = sweet spot
-          followerX += (mouseX - followerX) * 0.22;
-          followerY += (mouseY - followerY) * 0.22;
-          // translate3d forces GPU compositing, avoids layout thrash
-          follower.style.transform = `translate3d(${followerX - 10}px, ${followerY - 10}px, 0)`;
-          followerTicking = false;
-        });
-        followerTicking = true;
-      }
-      // Hide follower after 2s of no movement (reduces visual noise)
-      setTimeout(() => {
-        if (performance.now() - lastMoveTime > 2000) {
-          followerVisible = false;
-          follower.classList.remove('visible');
-        }
-      }, 2200);
-    }, { passive: true });
-
-    // Hover state on interactive elements
-    document.querySelectorAll('a, button, .cap-row, .not-do-item, .tier, .compliance-item, .how-step, .changelog-row, .faq-item').forEach(el => {
-      el.addEventListener('mouseenter', () => follower.classList.add('hover'));
-      el.addEventListener('mouseleave', () => follower.classList.remove('hover'));
-    });
-  }
-
-  // === Tagline rotative ===
-  const taglineWords = document.querySelectorAll('.tagline-word');
-  let taglineRotations = ['autopilot.', 'without staffing.', 'continuously.'];
-  let taglineIdx = 0;
-  // Set actual content
-  taglineWords.forEach((el, i) => {
-    el.textContent = taglineRotations[i] || taglineRotations[0];
-  });
-  setInterval(() => {
-    taglineWords.forEach(w => w.classList.remove('active'));
-    taglineIdx = (taglineIdx + 1) % taglineRotations.length;
-    // Position the next word in place
-    const next = document.getElementById('tagline');
-    const oldActive = document.querySelector('.tagline-word.active');
-    if (oldActive) {
-      oldActive.style.position = 'absolute';
-      oldActive.style.opacity = '0';
-      oldActive.style.transform = 'translateY(-20%)';
-    }
-    // Create or reuse the word element
-    let activeEl = next.querySelector('.tagline-word.active');
-    if (!activeEl) {
-      activeEl = document.createElement('span');
-      activeEl.className = 'tagline-word';
-      next.appendChild(activeEl);
-    }
-    activeEl.textContent = taglineRotations[taglineIdx];
-    activeEl.style.position = 'relative';
-    requestAnimationFrame(() => {
-      activeEl.classList.add('active');
-      activeEl.style.opacity = '1';
-      activeEl.style.transform = 'translateY(0)';
-    });
-    // Cleanup old
-    setTimeout(() => {
-      next.querySelectorAll('.tagline-word').forEach(w => {
-        if (w !== activeEl) w.remove();
-      });
-    }, 600);
-  }, 2800);
 
   // === Toast (delayed show on load) ===
   const toast = document.getElementById('toast');
@@ -4521,7 +4408,9 @@ const themeObs = new MutationObserver(applyTheme);
 themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
 // =====================================================
-// SECTION 1: HERO HOURGLASS (matches og.png aesthetic)
+// =====================================================
+// SECTION 1: HERO GEOMETRIC SCENE (icosahedron + constellation)
+// Editorial minimal — math made visible, not a literal object
 // =====================================================
 const heroContainer = document.getElementById('hero3d-canvas');
 const heroShot = document.getElementById('hero3d');
@@ -4530,177 +4419,131 @@ if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matche
   const scene = new THREE.Scene();
   scene.background = null;
   
-  const camera = new THREE.PerspectiveCamera(38, heroContainer.clientWidth / heroContainer.clientHeight, 0.1, 100);
-  camera.position.set(0, 0, 9);
+  const camera = new THREE.PerspectiveCamera(40, heroContainer.clientWidth / heroContainer.clientHeight, 0.1, 100);
+  camera.position.set(0, 0, 8);
   
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setSize(heroContainer.clientWidth, heroContainer.clientHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   heroContainer.appendChild(renderer.domElement);
   
-  // === LIGHTING ===
-  const ambient = new THREE.AmbientLight(0xffffff, 0.65);
+  // === LIGHTING (subtle, editorial) ===
+  const ambient = new THREE.AmbientLight(0xffffff, 0.8);
   scene.add(ambient);
   scene.userData.ambient = ambient;
   
-  const keyLight = new THREE.DirectionalLight(0xffffff, 1.3);
-  keyLight.position.set(3, 4, 5);
+  const keyLight = new THREE.DirectionalLight(0xffffff, 0.9);
+  keyLight.position.set(2, 3, 4);
   scene.add(keyLight);
   window.__keyLight = keyLight;
   
-  const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
-  fillLight.position.set(-4, -1, 2);
+  const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+  fillLight.position.set(-3, -1, 2);
   scene.add(fillLight);
-  
-  const rimLight = new THREE.DirectionalLight(0xffffff, 0.7);
-  rimLight.position.set(0, -2, -4);
-  scene.add(rimLight);
-  
-  // === HOURGLASS GEOMETRY (procedural, no external models) ===
-  // Top + bottom pyramid (cones) + frame cylinders + sand particles
   
   const t = getTheme();
   
-  // Top cone (inverted — sand flows down through the narrow waist)
-  const coneTopGeo = new THREE.ConeGeometry(1.3, 1.6, 32, 1, true);
-  const coneMat = new THREE.MeshPhysicalMaterial({
+  // === CENTRAL ICOSAHEDRON (solid, slightly reflective) ===
+  const icoGeo = new THREE.IcosahedronGeometry(1.4, 0);
+  const icoMat = new THREE.MeshStandardMaterial({
     color: t.fg,
-    metalness: 0.2,
-    roughness: 0.4,
-    clearcoat: 0.5,
-    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.92,
+    metalness: 0.3,
+    roughness: 0.45,
+    flatShading: true,
   });
-  coneMat.userData = { role: 'fg' };
-  const coneTop = new THREE.Mesh(coneTopGeo, coneMat);
-  coneTop.position.y = 0.85;
-  coneTop.rotation.x = Math.PI; // point down
-  scene.add(coneTop);
+  icoMat.userData = { role: 'fg' };
+  const icosahedron = new THREE.Mesh(icoGeo, icoMat);
+  scene.add(icosahedron);
   
-  // Bottom cone (point up)
-  const coneBot = new THREE.Mesh(coneTopGeo, coneMat.clone());
-  coneBot.position.y = -0.85;
-  scene.add(coneBot);
-  
-  // Glass envelope: outer sphere segments to suggest glass curvature
-  const glassTopGeo = new THREE.SphereGeometry(1.32, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
-  const glassMat = new THREE.MeshPhysicalMaterial({
+  // === WIREFRAME OVERLAY (same shape, edge-only) ===
+  const wireGeo = new THREE.IcosahedronGeometry(1.42, 0);
+  const wireMat = new THREE.MeshBasicMaterial({
     color: t.fg,
-    metalness: 0.1,
-    roughness: 0.1,
-    transmission: 0.75,
-    thickness: 0.3,
-    clearcoat: 1.0,
-    side: THREE.DoubleSide,
+    wireframe: true,
     transparent: true,
     opacity: 0.35,
-    ior: 1.45,
   });
-  glassMat.userData = { role: 'fgSoft' };
-  const glassTop = new THREE.Mesh(glassTopGeo, glassMat);
-  glassTop.position.y = 0.85;
-  glassTop.scale.y = 0.6;
-  scene.add(glassTop);
+  wireMat.userData = { role: 'fg' };
+  const wireframe = new THREE.Mesh(wireGeo, wireMat);
+  scene.add(wireframe);
   
-  const glassBot = new THREE.Mesh(glassTopGeo, glassMat.clone());
-  glassBot.position.y = -0.85;
-  glassBot.rotation.x = Math.PI;
-  glassBot.scale.y = 0.6;
-  scene.add(glassBot);
-  
-  // Wood/metal frame: top + bottom caps + 4 vertical pillars
-  const frameMat = new THREE.MeshStandardMaterial({
+  // === OUTER GHOST SPHERE (very subtle, suggests a field) ===
+  const ghostGeo = new THREE.SphereGeometry(2.0, 24, 16);
+  const ghostMat = new THREE.MeshBasicMaterial({
     color: t.fg,
-    metalness: 0.7,
-    roughness: 0.3,
-  });
-  frameMat.userData = { role: 'fg' };
-  
-  const capTopGeo = new THREE.CylinderGeometry(1.4, 1.4, 0.12, 32);
-  const capTop = new THREE.Mesh(capTopGeo, frameMat);
-  capTop.position.y = 1.7;
-  scene.add(capTop);
-  
-  const capBot = new THREE.Mesh(capTopGeo, frameMat.clone());
-  capBot.position.y = -1.7;
-  scene.add(capBot);
-  
-  // 4 vertical pillars at corners
-  const pillarGeo = new THREE.CylinderGeometry(0.04, 0.04, 3.5, 8);
-  for (let i = 0; i < 4; i++) {
-    const angle = (i / 4) * Math.PI * 2;
-    const pillar = new THREE.Mesh(pillarGeo, frameMat.clone());
-    pillar.position.x = Math.cos(angle) * 1.4;
-    pillar.position.z = Math.sin(angle) * 1.4;
-    pillar.position.y = 0;
-    scene.add(pillar);
-  }
-  
-  // === SAND: two piles + falling stream ===
-  // Top sand (inverted cone inside the top cone — like sand piled up)
-  const sandTopGeo = new THREE.ConeGeometry(0.8, 0.5, 24);
-  const sandMat = new THREE.MeshStandardMaterial({
-    color: t.fg,
-    metalness: 0.05,
-    roughness: 0.95,
-  });
-  sandMat.userData = { role: 'fg' };
-  const sandTop = new THREE.Mesh(sandTopGeo, sandMat.clone());
-  sandTop.position.y = 1.0;
-  scene.add(sandTop);
-  
-  // Bottom sand (flat pile that grows)
-  const sandBotGeo = new THREE.ConeGeometry(1.1, 0.7, 24);
-  const sandBot = new THREE.Mesh(sandBotGeo, sandMat.clone());
-  sandBot.position.y = -1.0;
-  sandBot.scale.y = 0.5;
-  scene.add(sandBot);
-  scene.userData.sand = sandBot;
-  
-  // Falling sand stream: 60 particles between waist and bottom pile
-  const grainCount = 60;
-  const grainGeo = new THREE.BufferGeometry();
-  const grainPositions = new Float32Array(grainCount * 3);
-  const grainVelocities = new Float32Array(grainCount);
-  for (let i = 0; i < grainCount; i++) {
-    grainPositions[i * 3] = (Math.random() - 0.5) * 0.05;
-    grainPositions[i * 3 + 1] = Math.random() * 2.0 - 0.8;
-    grainPositions[i * 3 + 2] = (Math.random() - 0.5) * 0.05;
-    grainVelocities[i] = 0.5 + Math.random() * 0.5;
-  }
-  grainGeo.setAttribute('position', new THREE.BufferAttribute(grainPositions, 3));
-  const grainMat = new THREE.PointsMaterial({
-    color: t.fg,
-    size: 0.035,
+    wireframe: true,
     transparent: true,
-    opacity: 0.9,
+    opacity: 0.06,
   });
-  grainMat.userData = { role: 'fg' };
-  const grains = new THREE.Points(grainGeo, grainMat);
-  scene.add(grains);
+  ghostMat.userData = { role: 'fgSoft' };
+  const ghost = new THREE.Mesh(ghostGeo, ghostMat);
+  scene.add(ghost);
   
-  // === INTERACTION: drag to rotate + auto-tilt ===
+  // === CONSTELLATION: 12 vertex points at icosahedron vertices ===
+  const vertPositions = icoGeo.attributes.position;
+  const uniqueVerts = [];
+  const seen = new Set();
+  for (let i = 0; i < vertPositions.count; i++) {
+    const x = vertPositions.getX(i).toFixed(3);
+    const y = vertPositions.getY(i).toFixed(3);
+    const z = vertPositions.getZ(i).toFixed(3);
+    const key = `${x},${y},${z}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueVerts.push(new THREE.Vector3(parseFloat(x), parseFloat(y), parseFloat(z)));
+    }
+  }
+  const pointGeo = new THREE.SphereGeometry(0.055, 12, 12);
+  const pointMat = new THREE.MeshBasicMaterial({ color: t.fg });
+  pointMat.userData = { role: 'fg' };
+  const constellation = new THREE.Group();
+  uniqueVerts.forEach((v, i) => {
+    const pt = new THREE.Mesh(pointGeo, pointMat.clone());
+    pt.position.copy(v).multiplyScalar(1.42);
+    pt.userData.basePhase = i * 0.5;
+    constellation.add(pt);
+  });
+  scene.add(constellation);
+  
+  // === ORBIT RINGS (sense of time / orbit) ===
+  const ringGeo = new THREE.TorusGeometry(2.3, 0.006, 8, 100);
+  const ringMat = new THREE.MeshBasicMaterial({
+    color: t.fg,
+    transparent: true,
+    opacity: 0.25,
+  });
+  ringMat.userData = { role: 'fg' };
+  const orbit = new THREE.Mesh(ringGeo, ringMat);
+  orbit.rotation.x = Math.PI / 2.4;
+  scene.add(orbit);
+  
+  const orbit2 = new THREE.Mesh(ringGeo.clone(), ringMat.clone());
+  orbit2.rotation.x = Math.PI / 1.6;
+  orbit2.rotation.y = Math.PI / 4;
+  orbit2.material.opacity = 0.15;
+  scene.add(orbit2);
+  
+  // === INTERACTION (drag to rotate) ===
   let isDragging = false;
   let prevMouse = { x: 0, y: 0 };
-  let userRotY = 0.15;
-  let userRotX = -0.1;
+  let userRotY = 0.3;
+  let userRotX = -0.15;
   
   heroContainer.addEventListener('mousedown', (e) => {
     isDragging = true;
     prevMouse = { x: e.clientX, y: e.clientY };
+    heroContainer.style.cursor = 'grabbing';
   });
-  window.addEventListener('mouseup', () => { isDragging = false; });
+  window.addEventListener('mouseup', () => { isDragging = false; heroContainer.style.cursor = 'grab'; });
   window.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
     const dx = e.clientX - prevMouse.x;
     const dy = e.clientY - prevMouse.y;
     userRotY += dx * 0.005;
-    userRotX = Math.max(-0.4, Math.min(0.4, userRotX + dy * 0.005));
+    userRotX = Math.max(-0.6, Math.min(0.6, userRotX + dy * 0.005));
     prevMouse = { x: e.clientX, y: e.clientY };
   });
   
-  // Touch support
   heroContainer.addEventListener('touchstart', (e) => {
     if (e.touches.length === 1) {
       isDragging = true;
@@ -4713,11 +4556,11 @@ if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matche
     const dx = e.touches[0].clientX - prevMouse.x;
     const dy = e.touches[0].clientY - prevMouse.y;
     userRotY += dx * 0.005;
-    userRotX = Math.max(-0.4, Math.min(0.4, userRotX + dy * 0.005));
+    userRotX = Math.max(-0.6, Math.min(0.6, userRotX + dy * 0.005));
     prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   });
   
-  // === SCROLL: subtle camera dolly + slight tilt ===
+  // === SCROLL: subtle camera dolly ===
   let scrollProgress = 0;
   window.addEventListener('scroll', () => {
     scrollProgress = window.scrollY / Math.max(1, document.body.scrollHeight - window.innerHeight);
@@ -4725,51 +4568,40 @@ if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matche
   
   // === ANIMATION LOOP ===
   const clock = new THREE.Clock();
-  let sandFlip = 0; // 0 to 1: amount of sand that has flipped
   
   function animateHero() {
     const dt = clock.getDelta();
     const t2 = clock.getElapsedTime();
     
-    // Apply rotation to whole group
-    scene.rotation.y = userRotY + Math.sin(t2 * 0.3) * 0.08; // gentle ambient sway
-    scene.rotation.x = userRotX;
+    icosahedron.rotation.y = userRotY + Math.sin(t2 * 0.25) * 0.12;
+    icosahedron.rotation.x = userRotX;
+    wireframe.rotation.copy(icosahedron.rotation);
     
-    // Animate sand grains (fall from waist at y=0 down to bottom pile at y=-1)
-    const grainPos = grains.geometry.attributes.position.array;
-    for (let i = 0; i < grainCount; i++) {
-      grainPos[i * 3 + 1] -= grainVelocities[i] * dt;
-      if (grainPos[i * 3 + 1] < -1.0) {
-        // Respawn at waist
-        grainPos[i * 3 + 1] = 0;
-        grainPos[i * 3] = (Math.random() - 0.5) * 0.05;
-        grainPos[i * 3 + 2] = (Math.random() - 0.5) * 0.05;
-      }
-    }
-    grains.geometry.attributes.position.needsUpdate = true;
+    constellation.children.forEach((pt, i) => {
+      const phase = t2 * 0.8 + pt.userData.basePhase;
+      pt.material.opacity = 0.7 + Math.sin(phase) * 0.3;
+      pt.scale.setScalar(1.0 + Math.sin(phase * 1.3) * 0.15);
+    });
     
-    // Bottom pile grows slightly (visual feedback of accumulating sand)
-    sandBot.scale.y = 0.4 + Math.sin(t2 * 0.5) * 0.05;
+    ghost.rotation.y = -t2 * 0.05;
+    ghost.rotation.x = t2 * 0.03;
     
-    // Top pile shrinks
-    sandTop.scale.y = 0.95 + Math.sin(t2 * 0.4) * 0.03;
+    orbit.rotation.z = t2 * 0.15;
+    orbit2.rotation.z = -t2 * 0.1;
     
-    // Scroll-driven camera: push in slightly + slight rotation
-    const targetZ = 9 - scrollProgress * 1.5;
-    const targetRotY = scrollProgress * 0.3;
-    camera.position.z += (targetZ - camera.position.z) * 0.08;
-    camera.rotation.y += (targetRotY - camera.rotation.y) * 0.05;
+    const targetZ = 8 - scrollProgress * 1.2;
+    const targetRotX = scrollProgress * 0.15;
+    camera.position.z += (targetZ - camera.position.z) * 0.06;
+    camera.rotation.x += (targetRotX - camera.rotation.x) * 0.04;
     
     renderer.render(scene, camera);
     requestAnimationFrame(animateHero);
   }
   animateHero();
   
-  // Expose for theme sync
   window.__heroScene = scene;
   applyTheme();
   
-  // Resize observer
   const ro = new ResizeObserver(() => {
     const w = heroContainer.clientWidth;
     const h = heroContainer.clientHeight;
@@ -4782,7 +4614,6 @@ if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matche
   heroShot.dataset['3dReady'] = 'true';
 }
 
-// =====================================================
 // SECTION 2: BACKGROUND FLOATING ORBS (depth layers)
 // =====================================================
 const bgContainer = document.createElement('div');
