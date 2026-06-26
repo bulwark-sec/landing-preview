@@ -437,6 +437,13 @@
     background: var(--color-panel-2);
     border-color: var(--color-border-strong);
   }
+  @media (max-width: 1280px) {
+    .btn-signin { display: none; }
+  }
+  @media (max-width: 1500px) {
+    .nav-links { gap: 20px; }
+    .nav-links a { font-size: 13px; }
+  }
 
   /* === HERO === */
   .hero {
@@ -2501,8 +2508,8 @@
         <span class="lang-sep">/</span>
         <span class="lang-alt">FR</span>
       </button>
-      <span class="live"><span class="dot"></span> <span data-i18n="nav_status">v5.32 · 47 active engagements</span></span>
-      <a href="#" class="btn btn-ghost" data-i18n="nav_signin">Sign in</a>
+      <span class="live"><span class="dot"></span> <span data-i18n="nav_status">v5.32 · <span class="live-text-trim">47</span><span class="live-text-long"> active engagements</span></span></span>
+      <a href="#" class="btn btn-ghost btn-signin" data-i18n="nav_signin">Sign in</a>
       <a href="#" class="btn btn-primary" data-i18n="nav_request">Request access →</a>
     </div>
   </div>
