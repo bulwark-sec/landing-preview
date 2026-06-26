@@ -4570,7 +4570,7 @@ if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matche
     clearcoat: 0.5,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.85,
+    opacity: 0.92,
   });
   coneMat.userData = { role: 'fg' };
   const coneTop = new THREE.Mesh(coneTopGeo, coneMat);
@@ -4588,13 +4588,13 @@ if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matche
   const glassMat = new THREE.MeshPhysicalMaterial({
     color: t.fg,
     metalness: 0.1,
-    roughness: 0.05,
-    transmission: 0.92,
+    roughness: 0.1,
+    transmission: 0.75,
     thickness: 0.3,
     clearcoat: 1.0,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.18,
+    opacity: 0.35,
     ior: 1.45,
   });
   glassMat.userData = { role: 'fgSoft' };
