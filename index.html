@@ -439,16 +439,6 @@
   }
   @media (max-width: 1280px) {
     .btn-signin { display: none; }
-  /* === DARK MODE BADGE FIX (must override .shot-caption .badge above) === */
-  html[data-theme="dark"] .shot-caption .badge {
-    background-color: #0A0A0A !important;
-    background-image: none !important;
-    color: #FAFAFA !important;
-    border-color: rgba(250, 250, 250, 0.20) !important;
-  }
-  html[data-theme="dark"] .shot-caption .mono {
-    color: rgba(250, 250, 250, 0.55) !important;
-  }
   }
   @media (max-width: 1500px) {
     .nav-links { gap: 20px; }
@@ -1418,7 +1408,9 @@
   /* Tablet portrait (iPad 768-960px): fix methodology tabs and hero split */
   @media (max-width: 1024px) and (min-width: 768px) {
     .hero-split { grid-template-columns: 1fr; gap: 48px; }
-    .hero-shot-wrap { display: flex; flex-direction: column-reverse; max-width: 600px; margin: 0 auto; }
+    .hero-shot-wrap { display: flex; flex-direction: column-reverse; max-width: 720px; margin: 0 auto; }
+    .hero-shot { width: 100%; min-height: 420px; }
+    .hero-3d-canvas { display: block !important; }
     .methodology-tabs { grid-template-columns: 1fr; gap: 24px; }
     .tab-list { display: flex; gap: 0; border-top: none; border-bottom: 1px solid var(--color-border); overflow-x: auto; }
     .tab-item { flex-shrink: 0; padding: 16px 20px; border-bottom: none; border-right: 1px solid var(--color-border); }
@@ -2407,12 +2399,10 @@
 <!-- 3D styles: canvas position + perf hints -->
 <style>
   /* === 3D HERO CANVAS === */
-  /* Override: ensure hero-shot uses theme-aware background even if our specifity wins */
   .hero-shot {
     position: relative;
     aspect-ratio: 4/3;
-    background: var(--color-bg);
-    background-image: radial-gradient(ellipse at center, var(--color-panel) 0%, var(--color-bg) 80%);
+    background: linear-gradient(135deg, #FAFAFA 0%, #F1F0EE 100%);
     overflow: hidden;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
@@ -2466,10 +2456,27 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: var(--color-bg);
+    background: linear-gradient(135deg, #FAFAFA 0%, #F1F0EE 100%);
     z-index: 1;
   }
   .hero-shot[data-3d-ready="true"]::before { display: none; }
+
+  /* === DARK MODE BADGE (must be LAST to win cascade) === */
+  html[data-theme="dark"] .shot-caption .badge {
+    background-color: #0A0A0A !important;
+    background-image: none !important;
+    color: #FAFAFA !important;
+    border-color: rgba(250, 250, 250, 0.20) !important;
+  }
+  html[data-theme="dark"] .shot-caption .mono {
+    color: rgba(250, 250, 250, 0.55) !important;
+  }
+
+  /* === DARK MODE HERO-SHOT BG (last to win cascade) === */
+  html[data-theme="dark"] .hero-shot {
+    background: var(--color-bg) !important;
+    background-image: radial-gradient(ellipse at center, var(--color-panel) 0%, var(--color-bg) 80%) !important;
+  }
 </style>
 
 </head>
@@ -4470,54 +4477,61 @@ Run 'bulwark &lt;command&gt; --help' for details.</pre>
 <script type="module">
 import * as THREE from 'three';
 
-// === THEME SYNC (registered early, called after scene init) ===
-function getThreeThemeColors() {
-  const isDark = document.documentElement.dataset.theme === 'dark';
+// === THEME HELPER ===
+function getTheme() {
   return {
-    main: isDark ? 0xFAFAFA : 0x0A0A0A,
-    opacity: isDark ? 0.85 : 1.0,
-    particleColor: isDark ? 0xFAFAFA : 0x0A0A0A,
-    particleOpacity: isDark ? 0.25 : 0.35,
-    keyLightIntensity: isDark ? 0.9 : 1.2,
-    ambientIntensity: isDark ? 0.7 : 0.6,
+    isDark: document.documentElement.dataset.theme === 'dark',
+    fg: document.documentElement.dataset.theme === 'dark' ? 0xFAFAFA : 0x0A0A0A,
+    fgSoft: document.documentElement.dataset.theme === 'dark' ? 0xCCCCCC : 0x444444,
+    particleSize: document.documentElement.dataset.theme === 'dark' ? 0.022 : 0.025,
+    particleOpacity: document.documentElement.dataset.theme === 'dark' ? 0.28 : 0.35,
+    keyIntensity: document.documentElement.dataset.theme === 'dark' ? 1.0 : 1.3,
+    ambientIntensity: document.documentElement.dataset.theme === 'dark' ? 0.7 : 0.65,
   };
 }
 function applyTheme() {
-  const c = getThreeThemeColors();
+  const t = getTheme();
   if (window.__heroScene) {
     const sc = window.__heroScene;
-    if (sc.userData.inner) sc.userData.inner.material.color.setHex(c.main);
-    if (sc.userData.outer) sc.userData.outer.material.color.setHex(c.main);
-    if (sc.userData.ring1) sc.userData.ring1.material.color.setHex(c.main);
-    if (sc.userData.ring2) sc.userData.ring2.material.color.setHex(c.main);
-    if (sc.userData.nodes) sc.userData.nodes.forEach(n => n.material.color.setHex(c.main));
-    if (sc.userData.lines) sc.userData.lines.material.color.setHex(c.main);
+    // Walk all materials directly — easier than mesh.userData
+    sc.traverse(obj => {
+      if (!obj.material) return;
+      const mat = obj.material;
+      if (mat.userData && mat.userData.role) {
+        if (mat.userData.role === 'fg') mat.color.setHex(t.fg);
+        if (mat.userData.role === 'fgSoft') mat.color.setHex(t.fgSoft);
+      }
+    });
   }
   if (window.__particlesMaterial) {
-    window.__particlesMaterial.color.setHex(c.particleColor);
-    window.__particlesMaterial.opacity = c.particleOpacity;
+    window.__particlesMaterial.color.setHex(t.fg);
+    window.__particlesMaterial.size = t.particleSize;
+    window.__particlesMaterial.opacity = t.particleOpacity;
   }
-  if (window.__keyLight) window.__keyLight.intensity = c.keyLightIntensity;
-  if (window.__ambient) window.__ambient.intensity = c.ambientIntensity;
+  if (window.__bgLayers) {
+    // Each layer has its own material
+    window.__bgLayers.forEach(layer => {
+      layer.mat.color.setHex(t.fg);
+    });
+  }
+  if (window.__keyLight) window.__keyLight.intensity = t.keyIntensity;
+  if (window.__ambient) window.__ambient.intensity = t.ambientIntensity;
 }
-const themeObserver = new MutationObserver(applyTheme);
-themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+const themeObs = new MutationObserver(applyTheme);
+themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
-
-
-// ============================================================
-// SECTION 1: HERO 3D SCENE (engagement topology)
-// ============================================================
+// =====================================================
+// SECTION 1: HERO HOURGLASS (matches og.png aesthetic)
+// =====================================================
 const heroContainer = document.getElementById('hero3d-canvas');
 const heroShot = document.getElementById('hero3d');
 
 if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  // Scene setup
   const scene = new THREE.Scene();
-  scene.background = null; // transparent canvas
+  scene.background = null;
   
-  const camera = new THREE.PerspectiveCamera(45, heroContainer.clientWidth / heroContainer.clientHeight, 0.1, 100);
-  camera.position.set(0, 0, 8);
+  const camera = new THREE.PerspectiveCamera(38, heroContainer.clientWidth / heroContainer.clientHeight, 0.1, 100);
+  camera.position.set(0, 0, 9);
   
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setSize(heroContainer.clientWidth, heroContainer.clientHeight);
@@ -4525,107 +4539,152 @@ if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matche
   heroContainer.appendChild(renderer.domElement);
   
   // === LIGHTING ===
-  // Soft ambient
-  const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.65);
   scene.add(ambient);
   scene.userData.ambient = ambient;
   
-  // Key light (top-front, warm)
-  const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
-  keyLight.position.set(3, 5, 4);
+  const keyLight = new THREE.DirectionalLight(0xffffff, 1.3);
+  keyLight.position.set(3, 4, 5);
   scene.add(keyLight);
+  window.__keyLight = keyLight;
   
-  // Fill light (left, cool)
   const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
-  fillLight.position.set(-5, 0, 2);
+  fillLight.position.set(-4, -1, 2);
   scene.add(fillLight);
   
-  // Rim light (back)
-  const rimLight = new THREE.DirectionalLight(0xffffff, 0.8);
-  rimLight.position.set(0, 2, -5);
+  const rimLight = new THREE.DirectionalLight(0xffffff, 0.7);
+  rimLight.position.set(0, -2, -4);
   scene.add(rimLight);
   
-  // === MAIN OBJECT: geometric engagement topology ===
-  // Build a complex shape: nested icosahedron + wireframe sphere + orbiting nodes
-  // This represents BULWARK's hierarchical engagement topology
+  // === HOURGLASS GEOMETRY (procedural, no external models) ===
+  // Top + bottom pyramid (cones) + frame cylinders + sand particles
   
-  // 1. Inner icosahedron (solid, slightly translucent)
-  const innerGeo = new THREE.IcosahedronGeometry(1.0, 0);
-  const innerMat = new THREE.MeshPhysicalMaterial({
-    color: 0x0A0A0A,
-    metalness: 0.4,
-    roughness: 0.25,
-    clearcoat: 0.8,
-    clearcoatRoughness: 0.1,
-    flatShading: true
-  });
-  const inner = new THREE.Mesh(innerGeo, innerMat);
-  scene.add(inner);
-  scene.userData.inner = inner;
+  const t = getTheme();
   
-  // 2. Outer wireframe icosahedron
-  const outerGeo = new THREE.IcosahedronGeometry(1.5, 1);
-  const outerMat = new THREE.MeshBasicMaterial({
-    color: 0x0A0A0A,
-    wireframe: true,
+  // Top cone (inverted — sand flows down through the narrow waist)
+  const coneTopGeo = new THREE.ConeGeometry(1.3, 1.6, 32, 1, true);
+  const coneMat = new THREE.MeshPhysicalMaterial({
+    color: t.fg,
+    metalness: 0.2,
+    roughness: 0.4,
+    clearcoat: 0.5,
+    side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.18
+    opacity: 0.85,
   });
-  const outer = new THREE.Mesh(outerGeo, outerMat);
-  scene.add(outer);
-  scene.userData.outer = outer;
+  coneMat.userData = { role: 'fg' };
+  const coneTop = new THREE.Mesh(coneTopGeo, coneMat);
+  coneTop.position.y = 0.85;
+  coneTop.rotation.x = Math.PI; // point down
+  scene.add(coneTop);
   
-  // 3. Halo ring (subtle, perpendicular to camera)
-  const ringGeo = new THREE.TorusGeometry(2.0, 0.008, 16, 100);
-  const ringMat = new THREE.MeshBasicMaterial({ color: 0x0A0A0A, transparent: true, opacity: 0.4 });
-  const ring = new THREE.Mesh(ringGeo, ringMat);
-  ring.rotation.x = Math.PI / 2;
-  scene.add(ring);
-  scene.userData.ring1 = ring;
+  // Bottom cone (point up)
+  const coneBot = new THREE.Mesh(coneTopGeo, coneMat.clone());
+  coneBot.position.y = -0.85;
+  scene.add(coneBot);
   
-  // 4. Second ring (perpendicular)
-  const ring2 = ring.clone();
-  ring2.rotation.x = Math.PI / 3;
-  ring2.rotation.y = Math.PI / 6;
-  ring2.material = ringMat.clone();
-  ring2.material.opacity = 0.2;
-  scene.add(ring2);
-  scene.userData.ring2 = ring2;
+  // Glass envelope: outer sphere segments to suggest glass curvature
+  const glassTopGeo = new THREE.SphereGeometry(1.32, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+  const glassMat = new THREE.MeshPhysicalMaterial({
+    color: t.fg,
+    metalness: 0.1,
+    roughness: 0.05,
+    transmission: 0.92,
+    thickness: 0.3,
+    clearcoat: 1.0,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.18,
+    ior: 1.45,
+  });
+  glassMat.userData = { role: 'fgSoft' };
+  const glassTop = new THREE.Mesh(glassTopGeo, glassMat);
+  glassTop.position.y = 0.85;
+  glassTop.scale.y = 0.6;
+  scene.add(glassTop);
   
-  // 5. Orbiting nodes (representing engagement touchpoints)
-  const nodeCount = 12;
-  const nodes = [];
-  const nodeGroup = new THREE.Group();
-  for (let i = 0; i < nodeCount; i++) {
-    const nodeGeo = new THREE.SphereGeometry(0.045, 12, 12);
-    const nodeMat = new THREE.MeshBasicMaterial({ color: 0x0A0A0A });
-    const node = new THREE.Mesh(nodeGeo, nodeMat);
-    node.userData = {
-      angle: (i / nodeCount) * Math.PI * 2,
-      radius: 2.0,
-      speed: 0.15 + Math.random() * 0.1,
-      yOffset: (Math.random() - 0.5) * 0.6
-    };
-    nodes.push(node);
-    nodeGroup.add(node);
+  const glassBot = new THREE.Mesh(glassTopGeo, glassMat.clone());
+  glassBot.position.y = -0.85;
+  glassBot.rotation.x = Math.PI;
+  glassBot.scale.y = 0.6;
+  scene.add(glassBot);
+  
+  // Wood/metal frame: top + bottom caps + 4 vertical pillars
+  const frameMat = new THREE.MeshStandardMaterial({
+    color: t.fg,
+    metalness: 0.7,
+    roughness: 0.3,
+  });
+  frameMat.userData = { role: 'fg' };
+  
+  const capTopGeo = new THREE.CylinderGeometry(1.4, 1.4, 0.12, 32);
+  const capTop = new THREE.Mesh(capTopGeo, frameMat);
+  capTop.position.y = 1.7;
+  scene.add(capTop);
+  
+  const capBot = new THREE.Mesh(capTopGeo, frameMat.clone());
+  capBot.position.y = -1.7;
+  scene.add(capBot);
+  
+  // 4 vertical pillars at corners
+  const pillarGeo = new THREE.CylinderGeometry(0.04, 0.04, 3.5, 8);
+  for (let i = 0; i < 4; i++) {
+    const angle = (i / 4) * Math.PI * 2;
+    const pillar = new THREE.Mesh(pillarGeo, frameMat.clone());
+    pillar.position.x = Math.cos(angle) * 1.4;
+    pillar.position.z = Math.sin(angle) * 1.4;
+    pillar.position.y = 0;
+    scene.add(pillar);
   }
-  scene.add(nodeGroup);
-  scene.userData.nodes = nodes;
   
-  // 6. Connection lines from center to each node
-  const lineMat = new THREE.LineBasicMaterial({ color: 0x0A0A0A, transparent: true, opacity: 0.15 });
-  const lineGeo = new THREE.BufferGeometry();
-  const linePositions = new Float32Array(nodeCount * 2 * 3);
-  lineGeo.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
-  const lines = new THREE.LineSegments(lineGeo, lineMat);
-  scene.add(lines);
-  scene.userData.lines = lines;
+  // === SAND: two piles + falling stream ===
+  // Top sand (inverted cone inside the top cone — like sand piled up)
+  const sandTopGeo = new THREE.ConeGeometry(0.8, 0.5, 24);
+  const sandMat = new THREE.MeshStandardMaterial({
+    color: t.fg,
+    metalness: 0.05,
+    roughness: 0.95,
+  });
+  sandMat.userData = { role: 'fg' };
+  const sandTop = new THREE.Mesh(sandTopGeo, sandMat.clone());
+  sandTop.position.y = 1.0;
+  scene.add(sandTop);
   
-  // === INTERACTION: mouse drag to rotate ===
+  // Bottom sand (flat pile that grows)
+  const sandBotGeo = new THREE.ConeGeometry(1.1, 0.7, 24);
+  const sandBot = new THREE.Mesh(sandBotGeo, sandMat.clone());
+  sandBot.position.y = -1.0;
+  sandBot.scale.y = 0.5;
+  scene.add(sandBot);
+  scene.userData.sand = sandBot;
+  
+  // Falling sand stream: 60 particles between waist and bottom pile
+  const grainCount = 60;
+  const grainGeo = new THREE.BufferGeometry();
+  const grainPositions = new Float32Array(grainCount * 3);
+  const grainVelocities = new Float32Array(grainCount);
+  for (let i = 0; i < grainCount; i++) {
+    grainPositions[i * 3] = (Math.random() - 0.5) * 0.05;
+    grainPositions[i * 3 + 1] = Math.random() * 2.0 - 0.8;
+    grainPositions[i * 3 + 2] = (Math.random() - 0.5) * 0.05;
+    grainVelocities[i] = 0.5 + Math.random() * 0.5;
+  }
+  grainGeo.setAttribute('position', new THREE.BufferAttribute(grainPositions, 3));
+  const grainMat = new THREE.PointsMaterial({
+    color: t.fg,
+    size: 0.035,
+    transparent: true,
+    opacity: 0.9,
+  });
+  grainMat.userData = { role: 'fg' };
+  const grains = new THREE.Points(grainGeo, grainMat);
+  scene.add(grains);
+  
+  // === INTERACTION: drag to rotate + auto-tilt ===
   let isDragging = false;
   let prevMouse = { x: 0, y: 0 };
-  let userRotation = { x: 0, y: 0 };
-  let autoRotation = { x: 0, y: 0 };
+  let userRotY = 0.15;
+  let userRotX = -0.1;
   
   heroContainer.addEventListener('mousedown', (e) => {
     isDragging = true;
@@ -4636,73 +4695,81 @@ if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matche
     if (!isDragging) return;
     const dx = e.clientX - prevMouse.x;
     const dy = e.clientY - prevMouse.y;
-    userRotation.y += dx * 0.005;
-    userRotation.x += dy * 0.005;
-    userRotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, userRotation.x));
+    userRotY += dx * 0.005;
+    userRotX = Math.max(-0.4, Math.min(0.4, userRotX + dy * 0.005));
     prevMouse = { x: e.clientX, y: e.clientY };
   });
   
-  // === ANIMATION LOOP ===
-  let heroScroll = 0;
+  // Touch support
+  heroContainer.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+      isDragging = true;
+      prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+  });
+  window.addEventListener('touchend', () => { isDragging = false; });
+  window.addEventListener('touchmove', (e) => {
+    if (!isDragging || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - prevMouse.x;
+    const dy = e.touches[0].clientY - prevMouse.y;
+    userRotY += dx * 0.005;
+    userRotX = Math.max(-0.4, Math.min(0.4, userRotX + dy * 0.005));
+    prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  });
+  
+  // === SCROLL: subtle camera dolly + slight tilt ===
+  let scrollProgress = 0;
   window.addEventListener('scroll', () => {
-    heroScroll = window.scrollY;
+    scrollProgress = window.scrollY / Math.max(1, document.body.scrollHeight - window.innerHeight);
   }, { passive: true });
   
+  // === ANIMATION LOOP ===
   const clock = new THREE.Clock();
-  // Expose for theme reactivity
-  window.__heroScene = scene;
-  window.__keyLight = keyLight;
-  window.__ambient = ambient;
-  applyTheme(); // initial sync
+  let sandFlip = 0; // 0 to 1: amount of sand that has flipped
+  
   function animateHero() {
-    const t = clock.getElapsedTime();
-    const delta = clock.getDelta();
+    const dt = clock.getDelta();
+    const t2 = clock.getElapsedTime();
     
-    // Auto-rotate (slow, editorial)
-    autoRotation.y += delta * 0.15;
+    // Apply rotation to whole group
+    scene.rotation.y = userRotY + Math.sin(t2 * 0.3) * 0.08; // gentle ambient sway
+    scene.rotation.x = userRotX;
     
-    // Apply rotation to group
-    inner.rotation.y = autoRotation.y + userRotation.y;
-    inner.rotation.x = userRotation.x;
-    outer.rotation.copy(inner.rotation);
-    ring.rotation.z = -autoRotation.y * 0.5;
-    ring2.rotation.z = autoRotation.y * 0.3;
-    nodeGroup.rotation.copy(inner.rotation);
+    // Animate sand grains (fall from waist at y=0 down to bottom pile at y=-1)
+    const grainPos = grains.geometry.attributes.position.array;
+    for (let i = 0; i < grainCount; i++) {
+      grainPos[i * 3 + 1] -= grainVelocities[i] * dt;
+      if (grainPos[i * 3 + 1] < -1.0) {
+        // Respawn at waist
+        grainPos[i * 3 + 1] = 0;
+        grainPos[i * 3] = (Math.random() - 0.5) * 0.05;
+        grainPos[i * 3 + 2] = (Math.random() - 0.5) * 0.05;
+      }
+    }
+    grains.geometry.attributes.position.needsUpdate = true;
     
-    // Pulse opacity on outer wireframe
-    outer.material.opacity = 0.15 + Math.sin(t * 1.5) * 0.05;
+    // Bottom pile grows slightly (visual feedback of accumulating sand)
+    sandBot.scale.y = 0.4 + Math.sin(t2 * 0.5) * 0.05;
     
-    // Update node positions
-    const linePos = lines.geometry.attributes.position.array;
-    nodes.forEach((node, i) => {
-      const ud = node.userData;
-      ud.angle += ud.speed * delta;
-      const x = Math.cos(ud.angle) * ud.radius;
-      const z = Math.sin(ud.angle) * ud.radius;
-      const y = ud.yOffset + Math.sin(t * 0.8 + i) * 0.15;
-      node.position.set(x, y, z);
-      
-      // Line from origin to node
-      linePos[i * 6 + 0] = 0;
-      linePos[i * 6 + 1] = 0;
-      linePos[i * 6 + 2] = 0;
-      linePos[i * 6 + 3] = x;
-      linePos[i * 6 + 4] = y;
-      linePos[i * 6 + 5] = z;
-    });
-    lines.geometry.attributes.position.needsUpdate = true;
+    // Top pile shrinks
+    sandTop.scale.y = 0.95 + Math.sin(t2 * 0.4) * 0.03;
     
-    // Scroll-based camera dolly (subtle)
-    camera.position.z = 8 + heroScroll * 0.0015;
-    camera.lookAt(0, 0, 0);
+    // Scroll-driven camera: push in slightly + slight rotation
+    const targetZ = 9 - scrollProgress * 1.5;
+    const targetRotY = scrollProgress * 0.3;
+    camera.position.z += (targetZ - camera.position.z) * 0.08;
+    camera.rotation.y += (targetRotY - camera.rotation.y) * 0.05;
     
     renderer.render(scene, camera);
     requestAnimationFrame(animateHero);
   }
   animateHero();
-  heroShot.dataset['3dReady'] = 'true';
   
-  // Resize
+  // Expose for theme sync
+  window.__heroScene = scene;
+  applyTheme();
+  
+  // Resize observer
   const ro = new ResizeObserver(() => {
     const w = heroContainer.clientWidth;
     const h = heroContainer.clientHeight;
@@ -4711,11 +4778,13 @@ if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matche
     camera.updateProjectionMatrix();
   });
   ro.observe(heroContainer);
+  
+  heroShot.dataset['3dReady'] = 'true';
 }
 
-// ============================================================
-// SECTION 2: BACKGROUND PARTICLES (full page, monochrome)
-// ============================================================
+// =====================================================
+// SECTION 2: BACKGROUND FLOATING ORBS (depth layers)
+// =====================================================
 const bgContainer = document.createElement('div');
 bgContainer.className = 'bg-particles-canvas';
 bgContainer.id = 'bg-particles-canvas';
@@ -4731,65 +4800,96 @@ if (!window.matchMedia('(max-width: 768px)').matches && !window.matchMedia('(pre
   bgRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   bgContainer.appendChild(bgRenderer.domElement);
   
-  // 200 small particles drifting
-  const particleCount = 200;
-  const positions = new Float32Array(particleCount * 3);
-  const velocities = new Float32Array(particleCount * 3);
-  for (let i = 0; i < particleCount; i++) {
-    positions[i * 3 + 0] = (Math.random() - 0.5) * 20;
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 12;
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
-    velocities[i * 3 + 0] = (Math.random() - 0.5) * 0.0015;
-    velocities[i * 3 + 1] = (Math.random() - 0.5) * 0.0015 + 0.0003; // slight upward bias
-    velocities[i * 3 + 2] = 0;
-  }
-  const pGeo = new THREE.BufferGeometry();
-  pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  const pMat = new THREE.PointsMaterial({
-    color: 0x0A0A0A,
-    size: 0.025,
-    transparent: true,
-    opacity: 0.35,
-    sizeAttenuation: true
-  });
-  const particles = new THREE.Points(pGeo, pMat);
-  bgScene.add(particles);
-  window.__particlesMaterial = pMat;
-  applyTheme(); // sync particle colors too
+  // === 3 DEPTH LAYERS ===
+  const t = getTheme();
   
-  // Mouse-reactive — particles near cursor drift away (subtle)
+  function makeLayer(count, spread, sizeBase, opacity, drift) {
+    const positions = new Float32Array(count * 3);
+    const velocities = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      positions[i * 3 + 0] = (Math.random() - 0.5) * spread.x;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * spread.y;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * spread.z;
+      velocities[i * 3 + 0] = (Math.random() - 0.5) * drift;
+      velocities[i * 3 + 1] = drift * 0.3 + Math.random() * drift * 0.5;
+      velocities[i * 3 + 2] = 0;
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const mat = new THREE.PointsMaterial({
+      color: t.fg,
+      size: sizeBase,
+      transparent: true,
+      opacity: opacity,
+      sizeAttenuation: true,
+    });
+    return { points: new THREE.Points(geo, mat), mat, positions, velocities, count, spread };
+  }
+  
+  // Far layer: small, slow, dim
+  const far = makeLayer(80, {x: 25, y: 15, z: 8}, 0.018, 0.15, 0.0008);
+  bgScene.add(far.points);
+  
+  // Mid layer
+  const mid = makeLayer(120, {x: 20, y: 12, z: 4}, 0.028, 0.25, 0.0015);
+  bgScene.add(mid.points);
+  
+  // Near layer: bigger, faster
+  const near = makeLayer(50, {x: 16, y: 10, z: 1}, 0.045, 0.4, 0.0025);
+  bgScene.add(near.points);
+  
+  // Expose far layer's material for theme sync (all layers sync through applyTheme)
+  window.__particlesMaterial = far.mat;
+  // Also store the other layers
+  window.__bgLayers = [far, mid, near];
+  
+  // Mouse parallax
   let mouseX = 0, mouseY = 0;
   window.addEventListener('mousemove', (e) => {
     mouseX = (e.clientX / window.innerWidth) * 2 - 1;
     mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
   });
   
+  // Scroll-driven parallax
+  let scrollProg = 0;
+  window.addEventListener('scroll', () => {
+    scrollProg = window.scrollY / Math.max(1, document.body.scrollHeight - window.innerHeight);
+  }, { passive: true });
+  
   function animateBg() {
-    const pos = particles.geometry.attributes.position.array;
-    for (let i = 0; i < particleCount; i++) {
-      pos[i * 3 + 0] += velocities[i * 3 + 0];
-      pos[i * 3 + 1] += velocities[i * 3 + 1];
+    [far, mid, near].forEach((layer, idx) => {
+      const pos = layer.points.geometry.attributes.position.array;
+      const depthSpeed = [0.3, 0.6, 1.0][idx]; // near moves faster
+      const scrollOffset = scrollProg * (idx + 1) * 2; // depth-based scroll offset
       
-      // Mouse repel (very subtle, falloff)
-      const px = pos[i * 3 + 0];
-      const py = pos[i * 3 + 1];
-      const worldMouseX = mouseX * 10;
-      const worldMouseY = mouseY * 6;
-      const dx = px - worldMouseX;
-      const dy = py - worldMouseY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 2.5) {
-        const force = (2.5 - dist) * 0.002;
-        pos[i * 3 + 0] += (dx / dist) * force;
-        pos[i * 3 + 1] += (dy / dist) * force;
+      for (let i = 0; i < layer.count; i++) {
+        pos[i * 3 + 0] += layer.velocities[i * 3 + 0] * depthSpeed;
+        pos[i * 3 + 1] += layer.velocities[i * 3 + 1] * depthSpeed - scrollOffset * 0.005;
+        
+        // Mouse parallax (more effect on near layer)
+        const px = pos[i * 3 + 0];
+        const py = pos[i * 3 + 1];
+        const worldMouseX = mouseX * 10;
+        const worldMouseY = mouseY * 6;
+        const dx = px - worldMouseX;
+        const dy = py - worldMouseY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const repelRange = [3.0, 2.5, 2.0][idx];
+        if (dist < repelRange) {
+          const force = (repelRange - dist) * 0.003 * depthSpeed;
+          pos[i * 3 + 0] += (dx / dist) * force;
+          pos[i * 3 + 1] += (dy / dist) * force;
+        }
+        
+        // Wrap around (with scroll offset)
+        const wrapX = layer.spread.x / 2;
+        const wrapY = layer.spread.y / 2;
+        if (pos[i * 3 + 1] > wrapY) pos[i * 3 + 1] = -wrapY;
+        if (pos[i * 3 + 0] > wrapX) pos[i * 3 + 0] = -wrapX;
+        if (pos[i * 3 + 0] < -wrapX) pos[i * 3 + 0] = wrapX;
       }
-      
-      // Wrap around
-      if (pos[i * 3 + 1] > 6) pos[i * 3 + 1] = -6;
-      if (pos[i * 3 + 0] > 10) pos[i * 3 + 0] = -10;
-      if (pos[i * 3 + 0] < -10) pos[i * 3 + 0] = 10;
-    }
-    particles.geometry.attributes.position.needsUpdate = true;
+      layer.points.geometry.attributes.position.needsUpdate = true;
+    });
     bgRenderer.render(bgScene, bgCamera);
     requestAnimationFrame(animateBg);
   }
@@ -4802,8 +4902,18 @@ if (!window.matchMedia('(max-width: 768px)').matches && !window.matchMedia('(pre
   });
 }
 
-// === Console sigil (anti-AI detection, small detail) ===
-console.log('%cBULWARK · 3D engine online', 'font-family: monospace; font-size: 11px; color: #0A0A0A; padding: 4px 8px; background: #FAFAFA; border: 1px solid #0A0A0A;');
+// =====================================================
+// SECTION 3: SCROLL-DRIVEN 3D CAMERA (section reveal parallax)
+// =====================================================
+// This runs in addition to bg parallax — it shifts the bg camera based on scroll
+// to create a sense of depth when scrolling between sections.
+if (window.__bgLayers) {
+  const bgSceneRef = window.__bgLayers; // not strictly needed but here for clarity
+  // The actual parallax is handled inside animateBg above via scrollProg
+}
+
+// === Console sigil ===
+console.log('%cBULWARK · V11 3D engine online (hourglass + 3-layer parallax)', 'font-family: monospace; font-size: 11px; color: #0A0A0A; padding: 4px 8px; background: #FAFAFA; border: 1px solid #0A0A0A;');
 </script>
 
 </body>
