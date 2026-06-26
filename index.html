@@ -439,6 +439,16 @@
   }
   @media (max-width: 1280px) {
     .btn-signin { display: none; }
+  /* === DARK MODE BADGE FIX (must override .shot-caption .badge above) === */
+  html[data-theme="dark"] .shot-caption .badge {
+    background-color: #0A0A0A !important;
+    background-image: none !important;
+    color: #FAFAFA !important;
+    border-color: rgba(250, 250, 250, 0.20) !important;
+  }
+  html[data-theme="dark"] .shot-caption .mono {
+    color: rgba(250, 250, 250, 0.55) !important;
+  }
   }
   @media (max-width: 1500px) {
     .nav-links { gap: 20px; }
@@ -2397,10 +2407,12 @@
 <!-- 3D styles: canvas position + perf hints -->
 <style>
   /* === 3D HERO CANVAS === */
+  /* Override: ensure hero-shot uses theme-aware background even if our specifity wins */
   .hero-shot {
     position: relative;
     aspect-ratio: 4/3;
-    background: linear-gradient(135deg, #FAFAFA 0%, #F1F0EE 100%);
+    background: var(--color-bg);
+    background-image: radial-gradient(ellipse at center, var(--color-panel) 0%, var(--color-bg) 80%);
     overflow: hidden;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
@@ -2454,7 +2466,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, #FAFAFA 0%, #F1F0EE 100%);
+    background: var(--color-bg);
     z-index: 1;
   }
   .hero-shot[data-3d-ready="true"]::before { display: none; }
@@ -4458,6 +4470,41 @@ Run 'bulwark &lt;command&gt; --help' for details.</pre>
 <script type="module">
 import * as THREE from 'three';
 
+// === THEME SYNC (registered early, called after scene init) ===
+function getThreeThemeColors() {
+  const isDark = document.documentElement.dataset.theme === 'dark';
+  return {
+    main: isDark ? 0xFAFAFA : 0x0A0A0A,
+    opacity: isDark ? 0.85 : 1.0,
+    particleColor: isDark ? 0xFAFAFA : 0x0A0A0A,
+    particleOpacity: isDark ? 0.25 : 0.35,
+    keyLightIntensity: isDark ? 0.9 : 1.2,
+    ambientIntensity: isDark ? 0.7 : 0.6,
+  };
+}
+function applyTheme() {
+  const c = getThreeThemeColors();
+  if (window.__heroScene) {
+    const sc = window.__heroScene;
+    if (sc.userData.inner) sc.userData.inner.material.color.setHex(c.main);
+    if (sc.userData.outer) sc.userData.outer.material.color.setHex(c.main);
+    if (sc.userData.ring1) sc.userData.ring1.material.color.setHex(c.main);
+    if (sc.userData.ring2) sc.userData.ring2.material.color.setHex(c.main);
+    if (sc.userData.nodes) sc.userData.nodes.forEach(n => n.material.color.setHex(c.main));
+    if (sc.userData.lines) sc.userData.lines.material.color.setHex(c.main);
+  }
+  if (window.__particlesMaterial) {
+    window.__particlesMaterial.color.setHex(c.particleColor);
+    window.__particlesMaterial.opacity = c.particleOpacity;
+  }
+  if (window.__keyLight) window.__keyLight.intensity = c.keyLightIntensity;
+  if (window.__ambient) window.__ambient.intensity = c.ambientIntensity;
+}
+const themeObserver = new MutationObserver(applyTheme);
+themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+
+
 // ============================================================
 // SECTION 1: HERO 3D SCENE (engagement topology)
 // ============================================================
@@ -4481,6 +4528,7 @@ if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matche
   // Soft ambient
   const ambient = new THREE.AmbientLight(0xffffff, 0.6);
   scene.add(ambient);
+  scene.userData.ambient = ambient;
   
   // Key light (top-front, warm)
   const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
@@ -4513,6 +4561,7 @@ if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matche
   });
   const inner = new THREE.Mesh(innerGeo, innerMat);
   scene.add(inner);
+  scene.userData.inner = inner;
   
   // 2. Outer wireframe icosahedron
   const outerGeo = new THREE.IcosahedronGeometry(1.5, 1);
@@ -4524,6 +4573,7 @@ if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matche
   });
   const outer = new THREE.Mesh(outerGeo, outerMat);
   scene.add(outer);
+  scene.userData.outer = outer;
   
   // 3. Halo ring (subtle, perpendicular to camera)
   const ringGeo = new THREE.TorusGeometry(2.0, 0.008, 16, 100);
@@ -4531,6 +4581,7 @@ if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matche
   const ring = new THREE.Mesh(ringGeo, ringMat);
   ring.rotation.x = Math.PI / 2;
   scene.add(ring);
+  scene.userData.ring1 = ring;
   
   // 4. Second ring (perpendicular)
   const ring2 = ring.clone();
@@ -4539,6 +4590,7 @@ if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matche
   ring2.material = ringMat.clone();
   ring2.material.opacity = 0.2;
   scene.add(ring2);
+  scene.userData.ring2 = ring2;
   
   // 5. Orbiting nodes (representing engagement touchpoints)
   const nodeCount = 12;
@@ -4558,6 +4610,7 @@ if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matche
     nodeGroup.add(node);
   }
   scene.add(nodeGroup);
+  scene.userData.nodes = nodes;
   
   // 6. Connection lines from center to each node
   const lineMat = new THREE.LineBasicMaterial({ color: 0x0A0A0A, transparent: true, opacity: 0.15 });
@@ -4566,6 +4619,7 @@ if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matche
   lineGeo.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
   const lines = new THREE.LineSegments(lineGeo, lineMat);
   scene.add(lines);
+  scene.userData.lines = lines;
   
   // === INTERACTION: mouse drag to rotate ===
   let isDragging = false;
@@ -4595,6 +4649,11 @@ if (heroContainer && heroShot && !window.matchMedia('(max-width: 768px)').matche
   }, { passive: true });
   
   const clock = new THREE.Clock();
+  // Expose for theme reactivity
+  window.__heroScene = scene;
+  window.__keyLight = keyLight;
+  window.__ambient = ambient;
+  applyTheme(); // initial sync
   function animateHero() {
     const t = clock.getElapsedTime();
     const delta = clock.getDelta();
@@ -4695,6 +4754,8 @@ if (!window.matchMedia('(max-width: 768px)').matches && !window.matchMedia('(pre
   });
   const particles = new THREE.Points(pGeo, pMat);
   bgScene.add(particles);
+  window.__particlesMaterial = pMat;
+  applyTheme(); // sync particle colors too
   
   // Mouse-reactive — particles near cursor drift away (subtle)
   let mouseX = 0, mouseY = 0;
